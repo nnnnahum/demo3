@@ -2,13 +2,13 @@ package entities;
 
 import java.util.UUID;
 
-public class Instance extends BaseEntity {
+public class CloudLibrary extends BaseEntity {
 
-	public static final String RESOURCE = "/instance";
+	public static final String RESOURCE = "/cloudlibrary";
 	
-	public Instance() {}
+	public CloudLibrary() {}
 	
-	public Instance(UUID id, String currentUsage, String currentCapacity,
+	public CloudLibrary(UUID id, String currentUsage, String currentCapacity,
 			Integer cpuTotal, Integer cpuAvailable, 
 			Double ramTotal, Double ramAvailable,
 			Customer tenant, Host host, Datacenter datacenter) {

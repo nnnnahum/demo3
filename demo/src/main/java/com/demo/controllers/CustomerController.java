@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,49 +26,64 @@ import entities.requests.ResponseMessage;
 @Component
 @RestController
 @RequestMapping(Customer.RESOURCE)
-public class TenantController {
+public class CustomerController {
         
     @Autowired
     private MessageRouter router;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseMessage postTenant(
-    		@RequestBody Customer tenant) {
+    public ResponseMessage postCustomer(
+    		@RequestHeader(name = "auth") String authId,
+    		@RequestBody Customer customer) {
+    	Params headers = new Params();
+    	headers.put("authId", authId);
     	return router.sendAndReceive(new RequestMessage(HttpMethod.POST, Customer.RESOURCE, null, 
-    			null, null, tenant, Location.MGMTAPI, Location.LOCAL));
+    			null, headers, customer, Location.MGMTAPI, Location.LOCAL));
     }
 
 	
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public ResponseMessage putTenant(
+    public ResponseMessage putCustomer(
+    		@RequestHeader(name = "auth") String authId,
     		@PathVariable String id,
-    		@RequestBody Customer tenant) {
+    		@RequestBody Customer customer) {
+    	Params headers = new Params();
+    	headers.put("authId", authId);
 		return router.sendAndReceive(new RequestMessage(HttpMethod.PUT, Customer.RESOURCE, 
-    			UUID.fromString(id),  null, null, tenant, Location.MGMTAPI, Location.LOCAL));
+    			UUID.fromString(id),  null, headers, customer, Location.MGMTAPI, Location.LOCAL));
     }
 	
 	@DeleteMapping("/{id}")
-    public ResponseMessage deleteTenant(
+    public ResponseMessage deleteCustomer(
+    		@RequestHeader(name = "auth") String authId,
     		@PathVariable String id) {
+		Params headers = new Params();
+    	headers.put("authId", authId);
     	return router.sendAndReceive(new RequestMessage(HttpMethod.DELETE, Customer.RESOURCE, 
-    			UUID.fromString(id),  null, null, null, Location.MGMTAPI, Location.LOCAL));
+    			UUID.fromString(id),  null, headers, null, Location.MGMTAPI, Location.LOCAL));
     }
 	
 	@GetMapping
-    public ResponseMessage getTenants(
+    public ResponseMessage getCustomers(
+    		@RequestHeader(name = "auth") String authId,
     		@RequestParam(required = false) String query,
     		@RequestParam(required = false) String sort,
     		@RequestParam(required = false) String page,
     		@RequestParam(required = false) String pageSize
     		) {
+		Params headers = new Params();
+    	headers.put("authId", authId);
     	return router.sendAndReceive(new RequestMessage(HttpMethod.GET, Customer.RESOURCE, 
-    			null,  new Params(query, sort, page, pageSize), null, null, Location.MGMTAPI, Location.LOCAL));
+    			null,  new Params(query, sort, page, pageSize), headers, null, Location.MGMTAPI, Location.LOCAL));
     }
 	
 	@GetMapping("/{id}")
-    public ResponseMessage getTenant(
+    public ResponseMessage getCustomer(
+    		@RequestHeader(name = "auth") String authId,
     		@PathVariable String id) {
+		Params headers = new Params();
+    	headers.put("authId", authId);
     	return router.sendAndReceive(new RequestMessage(HttpMethod.GET, Customer.RESOURCE, 
-    			UUID.fromString(id),  null, null, null, Location.MGMTAPI, Location.LOCAL));
+    			UUID.fromString(id),  null, headers, null, Location.MGMTAPI, Location.LOCAL));
     }
 }

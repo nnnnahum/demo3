@@ -8,28 +8,28 @@ import org.springframework.stereotype.Component;
 
 import com.demo.db.Store;
 
-import entities.Instance;
+import entities.CloudLibrary;
 import entities.requests.Params;
 
 @Component
 public class InstanceModel {
 
-	private Store<Instance> instanceStore;
+	private Store<CloudLibrary> instanceStore;
 	
 	@Autowired 
 	public void setInstanceStore(InstanceStore store) {
 		this.instanceStore = store;
 	}
 
-	public Instance post(Instance instance) {
+	public CloudLibrary post(CloudLibrary instance) {
 		return instanceStore.post(instance);
 	}
 
-	public Instance getById(UUID id) {
+	public CloudLibrary getById(UUID id) {
 		return instanceStore.getById(id);
 	}
 
-	public Instance put(Instance instance) {
+	public CloudLibrary put(CloudLibrary instance) {
 		instanceStore.put(instance.getId(), instance);
 		return instanceStore.getById(instance.getId());
 	}
@@ -38,7 +38,7 @@ public class InstanceModel {
 		instanceStore.deleteById(id);
 	}
 
-	public List<Instance> get(Params query) {
+	public List<CloudLibrary> get(Params query) {
 		return instanceStore.get(query);
 	}
 	
@@ -46,7 +46,7 @@ public class InstanceModel {
 		return instanceStore.count(query);
 	}
 
-	public Instance patch(Instance instance) {
+	public CloudLibrary patch(CloudLibrary instance) {
 		return instanceStore.patch(instance);
 	}
 }

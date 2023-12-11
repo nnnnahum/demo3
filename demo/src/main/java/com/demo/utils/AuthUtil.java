@@ -43,6 +43,7 @@ public class AuthUtil {
 		if(user.getRoles().stream().map(x -> x.getId())
 				.filter(Set.of(RoleService.SUPER_ADMIN_ROLE_ID)::contains).count() > 0) return true;
 		
+		if(org == null) return false;
 		// get the org associated with the user and check if the role can perform the permission
 		return doesOrgHavePermissionForRole(org.getPerms(), 
 				user.getRoles().stream().map(x -> x.getId()).toList(), acceptablePermission);
@@ -110,5 +111,21 @@ public class AuthUtil {
 			query.put(Params.QUERY, "(" + query.get(Params.QUERY) + ");" + parentField + ".id==" + org.getId());
 		}
 		return query;
+	}
+	
+	public User getUserFromSession(RequestMessage request) {
+		
+		String auth = request.getHeaders().get("authId");
+		if(auth == null) return null;
+		UUID authId = UUID.fromString(auth);
+		RequestMessage fetchSession = new RequestMessage(HttpMethod.GET, Session.RESOURCE, authId, null, null, null, Location.LOCAL, Location.LOCAL);
+		ResponseMessage response = sessionService.getById(fetchSession);
+		if(response.getStatus() != HttpStatus.OK) return null;
+		Session session = (Session) response.getBody();
+		RequestMessage fetchUser = new RequestMessage(HttpMethod.GET, User.RESOURCE, session.getUserId(), null, null, null, Location.LOCAL, Location.LOCAL);
+		response = router.sendAndReceive(fetchUser);
+		if(response.getStatus() != HttpStatus.OK) return null;
+		User user = (User) response.getBody();
+		return user;
 	}
 }

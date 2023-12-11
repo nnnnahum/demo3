@@ -22,7 +22,7 @@ import com.demo.utils.OrgUtil;
 import entities.BaseEntity;
 import entities.EventsOfInterest;
 import entities.Host;
-import entities.Instance;
+import entities.CloudLibrary;
 import entities.Location;
 import entities.Organization;
 import entities.Permission;
@@ -56,11 +56,11 @@ public class InstanceService implements BaseService {
 	
 	@PostConstruct
 	public void start() {
-		router.registerRoute(Instance.RESOURCE, this);
+		router.registerRoute(CloudLibrary.RESOURCE, this);
 	}
 		
 	public ResponseMessage post(RequestMessage request) {
-		Instance instance = (Instance)request.getBody();
+		CloudLibrary instance = (CloudLibrary)request.getBody();
 		instance.setId(UUID.randomUUID());
 		FieldValidationErrorMessage fvem = validateInstance(instance, request.getHeaders());
 		if(fvem != null) {
@@ -111,7 +111,7 @@ public class InstanceService implements BaseService {
 		return new ResponseMessage(HttpStatus.CREATED, request.getHeaders(), instance);
 	}
 	
-	private FieldValidationErrorMessage validateInstance(Instance instance, Params headers) {
+	private FieldValidationErrorMessage validateInstance(CloudLibrary instance, Params headers) {
 		FieldValidationErrorMessage fvem = null;
 		
 		if(instance.getDatacenter() == null || instance.getDatacenter().getId() == null) {
@@ -134,7 +134,7 @@ public class InstanceService implements BaseService {
 	}
 
 	public ResponseMessage getById(RequestMessage request) {
-		Instance instance = model.getById(request.getId());
+		CloudLibrary instance = model.getById(request.getId());
 		if(instance == null) {
 			return new ErrorMessage(HttpStatus.NOT_FOUND, request.getHeaders(), 
 					"Instance not found with Id: " + request.getId());
@@ -154,7 +154,7 @@ public class InstanceService implements BaseService {
 	
 	public ResponseMessage put(RequestMessage request) {
 				
-		Instance instance = (Instance) request.getBody();
+		CloudLibrary instance = (CloudLibrary) request.getBody();
 		instance.setId(request.getId());
 		FieldValidationErrorMessage fvem = validateInstance(instance, request.getHeaders());
 		if(fvem != null) {
@@ -175,7 +175,7 @@ public class InstanceService implements BaseService {
 	}
 	
 	public ResponseMessage delete(RequestMessage request) {
-		Instance existingInstance = model.getById(request.getId());
+		CloudLibrary existingInstance = model.getById(request.getId());
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(existingInstance.getTenant().getId());
 			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_CLOUD_LIBRARIES))) {
@@ -197,7 +197,7 @@ public class InstanceService implements BaseService {
 		if(request.getSource() != Location.LOCAL) {	
 			query = authUtil.appendQueryForTenantPermissions(request, "tenant");
 		}
-		List<Instance> instances = model.get(query);
+		List<CloudLibrary> instances = model.get(query);
 		long count = model.count(query);
 		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), instances, 
 				new Count((long)instances.size(), count));
@@ -211,10 +211,10 @@ public class InstanceService implements BaseService {
 
 	@Override
 	public ResponseMessage patch(RequestMessage request) {
-		Instance instance = (Instance) request.getBody();
+		CloudLibrary instance = (CloudLibrary) request.getBody();
 		instance.setId(request.getId());
 		
-		Instance existingInstnace = model.getById(instance.getId());
+		CloudLibrary existingInstnace = model.getById(instance.getId());
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(existingInstnace.getTenant().getId());
 			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_CLOUD_LIBRARIES))) {

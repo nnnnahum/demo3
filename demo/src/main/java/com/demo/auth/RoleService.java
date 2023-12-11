@@ -228,6 +228,8 @@ public class RoleService implements BaseService{
 		// create admin and read only roles for the new provider. Patch the provider with the new permissions
 		UUID adminRoleId = UUID.randomUUID();
 		UUID viewRoleId = UUID.randomUUID();
+		
+		//TODO: set default perms for the roles. 
 		createRolesForOrg(reseller, adminRoleId, viewRoleId);
 		
 		// patch provider permissions given the new roles.
@@ -243,26 +245,15 @@ public class RoleService implements BaseService{
 	}
 
 	private void getPermsForViewRoleForReseller(List<PermissionOnEntity> resellerPerms, UUID viewRoleId) {
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_CUSTOMERS, viewRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_CLOUD_LIBRARIES, viewRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, viewRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, viewRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_SITES, viewRoleId));	
-		
+		for(Permission perm: HostingProvider.defaultViewPermission) {
+			resellerPerms.add(new PermissionOnEntity(perm, viewRoleId));
+		}
 	}
 
 	private void getPermsForAdminRoleForReseller(List<PermissionOnEntity> resellerPerms, UUID adminRoleId) {
-		resellerPerms.add(new PermissionOnEntity(Permission.MANAGE_CUSTOMERS, adminRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.MANAGE_CLOUD_LIBRARIES, adminRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.MANAGE_USERS, adminRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.MANAGE_ROLES, adminRoleId));
-
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_CUSTOMERS, adminRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_CLOUD_LIBRARIES, adminRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, adminRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, adminRoleId));
-		resellerPerms.add(new PermissionOnEntity(Permission.VIEW_SITES, adminRoleId));	
-		
+		for(Permission perm: HostingProvider.defaultAdminPermissions) {
+			resellerPerms.add(new PermissionOnEntity(perm, adminRoleId));
+		}
 	}
 
 	private void createDefaultRolesForProvider(HostingProvider provider) {
@@ -284,27 +275,15 @@ public class RoleService implements BaseService{
 	}
 
 	private void getPermsForViewRoleForProvider(List<PermissionOnEntity> providerPerms, UUID viewRoleId) {
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_PROVIDERS, viewRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_LIBRARIES, viewRoleId));		
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, viewRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, viewRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_DATACENTERS, viewRoleId));		
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_SITES, viewRoleId));		
+		for(Permission perm: HostingProvider.defaultViewPermission) {
+			providerPerms.add(new PermissionOnEntity(perm, viewRoleId));
+		}		
 	}
 
 	private void getPermsForAdminRoleForProvider(List<PermissionOnEntity> providerPerms, UUID adminRoleId) {
-		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_PROVIDERS, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_LIBRARIES, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_USERS, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_ROLES, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_DATACENTERS, adminRoleId));
-
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_PROVIDERS, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_LIBRARIES, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_DATACENTERS, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW_SITES, adminRoleId));		
+		for(Permission perm: HostingProvider.defaultAdminPermissions) {
+			providerPerms.add(new PermissionOnEntity(perm, adminRoleId));
+		}
 	}
 
 	private void createRolesForOrg(Organization org, UUID adminUuid, UUID viewRoleId) {
@@ -334,20 +313,15 @@ public class RoleService implements BaseService{
 	}
 
 	private void getPermsForViewRoleForCustomer(List<PermissionOnEntity> customerPerms, UUID viewRoleId) {
-		customerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, viewRoleId));
-		customerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, viewRoleId));
-		customerPerms.add(new PermissionOnEntity(Permission.VIEW_SITES, viewRoleId));
-		customerPerms.add(new PermissionOnEntity(Permission.VIEW_CLOUD_LIBRARIES, viewRoleId));		
+		for(Permission perm: Customer.defaultViewPermission) {
+			customerPerms.add(new PermissionOnEntity(perm, viewRoleId));
+		}	
 	}
 
 	private void getPermsForAdminRoleForCustomer(List<PermissionOnEntity> customerPerms, UUID adminRoleId) {
-		customerPerms.add(new PermissionOnEntity(Permission.MANAGE_USERS, adminRoleId));
-		customerPerms.add(new PermissionOnEntity(Permission.MANAGE_ROLES, adminRoleId));
-		customerPerms.add(new PermissionOnEntity(Permission.MANAGE_CLOUD_LIBRARIES, adminRoleId));
-		customerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, adminRoleId));
-		customerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, adminRoleId));
-		customerPerms.add(new PermissionOnEntity(Permission.VIEW_SITES, adminRoleId));
-		customerPerms.add(new PermissionOnEntity(Permission.VIEW_CLOUD_LIBRARIES, adminRoleId));
+		for(Permission perm: Customer.defaultAdminPermissions) {
+			customerPerms.add(new PermissionOnEntity(perm, adminRoleId));
+		}
 	}
 
 	@Override

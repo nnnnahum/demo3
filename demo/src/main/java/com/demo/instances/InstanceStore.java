@@ -15,11 +15,11 @@ import com.demo.db.MongoDBClient;
 import com.demo.db.MongoStoreUtil;
 import com.demo.db.Store;
 
-import entities.Instance;
+import entities.CloudLibrary;
 import entities.requests.Params;
 
 @Service
-public class InstanceStore implements Store<Instance>{
+public class InstanceStore implements Store<CloudLibrary>{
 
 	private static final String COLLECTION_NAME = "instances";
 
@@ -27,12 +27,12 @@ public class InstanceStore implements Store<Instance>{
 	MongoDBClient ops;
 	
 	@Override
-	public Instance post(Instance instance) {
+	public CloudLibrary post(CloudLibrary instance) {
 		return ops.getMongoOperations().insert(instance);
 	}
 
 	@Override
-	public Instance put(UUID id, Instance instance) {
+	public CloudLibrary put(UUID id, CloudLibrary instance) {
 	    
 		return ops.getMongoOperations().findAndReplace(
 				query(where("_id").is(id)), 
@@ -47,29 +47,29 @@ public class InstanceStore implements Store<Instance>{
 	}
 
 	@Override
-	public Instance getById(UUID id) {
+	public CloudLibrary getById(UUID id) {
 		return ops.getMongoOperations().findById(
-				id, Instance.class);
+				id, CloudLibrary.class);
 	}
 
 	@Override
-	public List<Instance> get(Params query) {
-		Query mongoQuery = MongoStoreUtil.getQuery(query, Instance.class);
-		return ops.getMongoOperations().find(mongoQuery, Instance.class);
+	public List<CloudLibrary> get(Params query) {
+		Query mongoQuery = MongoStoreUtil.getQuery(query, CloudLibrary.class);
+		return ops.getMongoOperations().find(mongoQuery, CloudLibrary.class);
 	}
 
 	@Override
 	public long count(Params query) {
-		Query mongoQuery = MongoStoreUtil.getQueryForCount(query, Instance.class);
-		return ops.getMongoOperations().count(mongoQuery, Instance.class);
+		Query mongoQuery = MongoStoreUtil.getQueryForCount(query, CloudLibrary.class);
+		return ops.getMongoOperations().count(mongoQuery, CloudLibrary.class);
 	}
 	
 	@Override
-	public Instance patch(Instance instance) {
+	public CloudLibrary patch(CloudLibrary instance) {
 		Update update = new Update();
 		if(instance.getHost() != null && instance.getHost().getId() != null) {
 			update.set("host", instance.getHost());
 		}
-		return ops.getMongoOperations().findAndModify(query(where("_id").is(instance.getId())), update, Instance.class, COLLECTION_NAME);
+		return ops.getMongoOperations().findAndModify(query(where("_id").is(instance.getId())), update, CloudLibrary.class, COLLECTION_NAME);
 	}
 }
