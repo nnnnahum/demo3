@@ -75,7 +75,7 @@ public class DatacenterService implements BaseService{
 						"provider id is not a registered provider: " 
 						+ datacenter.getProvider().getId());
 			}
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_DATACENTER))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -126,7 +126,7 @@ public class DatacenterService implements BaseService{
 		
 		if(request.getSource() != Location.LOCAL){
 			Organization org = orgUtil.getOrgfromOrgId(datacenter.getProvider().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE, Permission.VIEW))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_DATACENTER, Permission.VIEW_DATACENTER))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -164,7 +164,7 @@ public class DatacenterService implements BaseService{
 						"provider id is not a registered provider: " 
 						+ datacenter.getProvider().getId());
 			}
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_DATACENTER))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -202,7 +202,7 @@ public class DatacenterService implements BaseService{
 						"provider id is not a registered provider: " 
 						+ existingDatacenter.getProvider().getId());
 			}
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_DATACENTER))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -258,7 +258,7 @@ public class DatacenterService implements BaseService{
 						"provider id is not a registered provider: " 
 						+ existingDatacenter.getProvider().getId());
 			}
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_DATACENTER))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");

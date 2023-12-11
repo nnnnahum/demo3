@@ -1,5 +1,6 @@
 package com.demo.controllers;
 
+
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,57 +18,57 @@ import org.springframework.web.bind.annotation.RestController;
 import com.demo.router.MessageRouter;
 
 import entities.Location;
-import entities.Customer;
+import entities.Reseller;
 import entities.requests.Params;
 import entities.requests.RequestMessage;
 import entities.requests.ResponseMessage;
 
 @Component
 @RestController
-@RequestMapping(Customer.RESOURCE)
-public class TenantController {
+@RequestMapping(Reseller.RESOURCE)
+public class ResellerController {
         
     @Autowired
     private MessageRouter router;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseMessage postTenant(
-    		@RequestBody Customer tenant) {
-    	return router.sendAndReceive(new RequestMessage(HttpMethod.POST, Customer.RESOURCE, null, 
+    public ResponseMessage postReseller(
+    		@RequestBody Reseller tenant) {
+    	return router.sendAndReceive(new RequestMessage(HttpMethod.POST, Reseller.RESOURCE, null, 
     			null, null, tenant, Location.MGMTAPI, Location.LOCAL));
     }
 
 	
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public ResponseMessage putTenant(
+    public ResponseMessage putReseller(
     		@PathVariable String id,
-    		@RequestBody Customer tenant) {
-		return router.sendAndReceive(new RequestMessage(HttpMethod.PUT, Customer.RESOURCE, 
+    		@RequestBody Reseller tenant) {
+		return router.sendAndReceive(new RequestMessage(HttpMethod.PUT, Reseller.RESOURCE, 
     			UUID.fromString(id),  null, null, tenant, Location.MGMTAPI, Location.LOCAL));
     }
 	
 	@DeleteMapping("/{id}")
-    public ResponseMessage deleteTenant(
+    public ResponseMessage deleteReseller(
     		@PathVariable String id) {
-    	return router.sendAndReceive(new RequestMessage(HttpMethod.DELETE, Customer.RESOURCE, 
+    	return router.sendAndReceive(new RequestMessage(HttpMethod.DELETE, Reseller.RESOURCE, 
     			UUID.fromString(id),  null, null, null, Location.MGMTAPI, Location.LOCAL));
     }
 	
 	@GetMapping
-    public ResponseMessage getTenants(
+    public ResponseMessage getResellers(
     		@RequestParam(required = false) String query,
     		@RequestParam(required = false) String sort,
     		@RequestParam(required = false) String page,
     		@RequestParam(required = false) String pageSize
     		) {
-    	return router.sendAndReceive(new RequestMessage(HttpMethod.GET, Customer.RESOURCE, 
+    	return router.sendAndReceive(new RequestMessage(HttpMethod.GET, Reseller.RESOURCE, 
     			null,  new Params(query, sort, page, pageSize), null, null, Location.MGMTAPI, Location.LOCAL));
     }
 	
 	@GetMapping("/{id}")
-    public ResponseMessage getTenant(
+    public ResponseMessage getReseller(
     		@PathVariable String id) {
-    	return router.sendAndReceive(new RequestMessage(HttpMethod.GET, Customer.RESOURCE, 
+    	return router.sendAndReceive(new RequestMessage(HttpMethod.GET, Reseller.RESOURCE, 
     			UUID.fromString(id),  null, null, null, Location.MGMTAPI, Location.LOCAL));
     }
 }

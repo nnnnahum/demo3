@@ -66,7 +66,7 @@ public class UserService implements BaseService{
 							RoleService.SUPER_ADMIN_ROLE_ID, null, null, null, Location.LOCAL, Location.LOCAL));
 			Role role = (Role)response.getBody();
 			//create super admin user
-			User user = new User(SUPERUSERID, "Super", "BARADAZ", null, "admin@baradaz.com", PasswordEncrypter.encrypt("abc123"), role, null);
+			User user = new User(SUPERUSERID, "Super", "BARADAZ", null, "admin@baradaz.com", PasswordEncrypter.encrypt("abc123"), Arrays.asList(role), null);
 			model.post(user);
 		}
 	}
@@ -81,7 +81,7 @@ public class UserService implements BaseService{
 		
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(user.getOrg().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_USERS))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -142,7 +142,7 @@ public class UserService implements BaseService{
 		
 		if(request.getSource() != Location.LOCAL){
 			Organization org = orgUtil.getOrgfromOrgId(user.getOrg().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE, Permission.VIEW))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_USERS, Permission.VIEW_USERS))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -164,7 +164,7 @@ public class UserService implements BaseService{
 
 		if(request.getSource() != Location.LOCAL) {
 		Organization org = orgUtil.getOrgfromOrgId(user.getOrg().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_USERS))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -194,7 +194,7 @@ public class UserService implements BaseService{
 		User existingUser = model.getById(request.getId());
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(existingUser.getOrg().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_USERS))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -234,7 +234,7 @@ public class UserService implements BaseService{
 		User existingUser = model.getById(user.getId());
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(existingUser.getOrg().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_USERS))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");

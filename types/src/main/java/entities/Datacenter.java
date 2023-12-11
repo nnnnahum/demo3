@@ -11,13 +11,13 @@ public class Datacenter extends BaseEntity{
 
 	private String geo;
 	private String name;
-	private Provider provider;
+	private HostingProvider provider;
 	private LatLong latlong;
 	private AggregatedHostMetrics datacenterMetrics;
 	
 	public Datacenter() {}
 	
-	public Datacenter(UUID id, String geo, String name, Provider provider, LatLong latlong, 
+	public Datacenter(UUID id, String geo, String name, HostingProvider provider, LatLong latlong, 
 			AggregatedHostMetrics datacenterMetrcs) {
 		super(id);
 		this.geo = geo;
@@ -40,11 +40,11 @@ public class Datacenter extends BaseEntity{
 		this.name = name;
 	}
 
-	public Provider getProvider() {
+	public HostingProvider getProvider() {
 		return provider;
 	}
 
-	public void setProvider(Provider provider) {
+	public void setProvider(HostingProvider provider) {
 		this.provider = provider;
 	}
 

@@ -1,5 +1,5 @@
 package entities;
 
 public enum EventsOfInterest {
-	tenant_created, provider_created;
+	customer_created, provider_created, reseller_created;
 }

@@ -8,28 +8,28 @@ import org.springframework.stereotype.Component;
 
 import com.demo.db.Store;
 
-import entities.Provider;
+import entities.HostingProvider;
 import entities.requests.Params;
 
 @Component
 public class ProviderModel {
 
-	private Store<Provider> providerStore;
+	private Store<HostingProvider> providerStore;
 	
 	@Autowired 
 	public void setUserStore(ProviderStore store) {
 		this.providerStore = store;
 	}
 
-	public Provider post(Provider provider) {
+	public HostingProvider post(HostingProvider provider) {
 		return providerStore.post(provider);
 	}
 
-	public Provider getById(UUID id) {
+	public HostingProvider getById(UUID id) {
 		return providerStore.getById(id);
 	}
 
-	public Provider put(Provider provider) {
+	public HostingProvider put(HostingProvider provider) {
 		providerStore.put(provider.getId(), provider);
 		return providerStore.getById(provider.getId());
 	}
@@ -38,7 +38,7 @@ public class ProviderModel {
 		providerStore.deleteById(id);
 	}
 
-	public List<Provider> get(Params query) {
+	public List<HostingProvider> get(Params query) {
 		return providerStore.get(query);
 	}
 	
@@ -46,7 +46,7 @@ public class ProviderModel {
 		return providerStore.count(query);
 	}
 
-	public Provider patch(Provider provider) {
+	public HostingProvider patch(HostingProvider provider) {
 		return providerStore.patch(provider);
 	}
 }

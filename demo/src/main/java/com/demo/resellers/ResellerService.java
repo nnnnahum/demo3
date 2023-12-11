@@ -1,5 +1,4 @@
-package com.demo.tenants;
-
+package com.demo.resellers;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,7 +13,7 @@ import com.demo.router.MessageRouter;
 
 import entities.BaseEntity;
 import entities.EventsOfInterest;
-import entities.Tenant;
+import entities.Reseller;
 import entities.requests.Count;
 import entities.requests.ErrorMessage;
 import entities.requests.FieldValidationErrorMessage;
@@ -23,40 +22,38 @@ import entities.requests.RequestMessage;
 import entities.requests.ResponseMessage;
 
 @Component
-public class TenantService implements BaseService{
+public class ResellerService implements BaseService{
 
-	public static final UUID SUPERTENANTID = UUID.fromString("3fc52e06-95de-4247-9bb6-e07720b6f40d");
-
-	public static final String PATH = "/tenants";
+	public static final String PATH = "/resellers";
 	
 	@Autowired
 	MessageRouter router;
 	
 	@Autowired
-	TenantModel model;
+	ResellerModel model;
 	
 	@PostConstruct
 	public void start() {
-		router.registerRoute(Tenant.RESOURCE, this);
+		router.registerRoute(Reseller.RESOURCE, this);
 	}
 		
 	public ResponseMessage post(RequestMessage request) {
-		Tenant tenant = (Tenant) request.getBody();
-		tenant.setId(UUID.randomUUID());
-		FieldValidationErrorMessage fvem = validateTenant(tenant, request.getHeaders());
+		Reseller reseller = (Reseller) request.getBody();
+		reseller.setId(UUID.randomUUID());
+		FieldValidationErrorMessage fvem = validateReseller(reseller, request.getHeaders());
 		if(fvem != null) {
 			return fvem;
 		}
 			
-		tenant = model.post(tenant);
-		router.notify(EventsOfInterest.tenant_created, tenant);
-		return new ResponseMessage(HttpStatus.CREATED, request.getHeaders(), tenant);
+		reseller = model.post(reseller);
+		router.notify(EventsOfInterest.reseller_created, reseller);
+		return new ResponseMessage(HttpStatus.CREATED, request.getHeaders(), reseller);
 	}
 	
-	private FieldValidationErrorMessage validateTenant(Tenant tenant, Params headers) {
+	private FieldValidationErrorMessage validateReseller(Reseller reseller, Params headers) {
 		FieldValidationErrorMessage fvem = null;
 		
-		if(tenant.getName() == null || tenant.getName().isEmpty()) {
+		if(reseller.getName() == null || reseller.getName().isEmpty()) {
 			fvem = FieldValidationErrorMessage.addError(fvem, headers, "name");
 		}
 		
@@ -64,24 +61,24 @@ public class TenantService implements BaseService{
 	}
 
 	public ResponseMessage getById(RequestMessage request) {
-		Tenant tenant = model.getById(request.getId());
-		if(tenant == null) {
+		Reseller reseller = model.getById(request.getId());
+		if(reseller == null) {
 			return new ErrorMessage(HttpStatus.NOT_FOUND, request.getHeaders(), 
-					"Tenant not found with Id: " + request.getId());
+					"Reseller not found with Id: " + request.getId());
 		}
-		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), tenant);
+		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), reseller);
 	}
 	
 	public ResponseMessage put(RequestMessage request) {
-		Tenant tenant = (Tenant) request.getBody();
-		tenant.setId(request.getId());
-		FieldValidationErrorMessage fvem = validateTenant(tenant, request.getHeaders());
+		Reseller reseller = (Reseller) request.getBody();
+		reseller.setId(request.getId());
+		FieldValidationErrorMessage fvem = validateReseller(reseller, request.getHeaders());
 		if(fvem != null) {
 			return fvem;
 		}
 
-		tenant = model.put(tenant);
-		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), tenant);	
+		reseller = model.put(reseller);
+		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), reseller);	
 	}
 	
 	public ResponseMessage delete(RequestMessage request) {
@@ -94,10 +91,10 @@ public class TenantService implements BaseService{
 			return getById(request);
 		}
 		Params query = request.getQuery();
-		List<Tenant> tenants = model.get(query);
+		List<Reseller> resellers = model.get(query);
 		long count = model.count(query);
-		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), tenants, 
-				new Count((long)tenants.size(), count));
+		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), resellers, 
+				new Count((long)resellers.size(), count));
 	}
 
 	@Override
@@ -108,9 +105,9 @@ public class TenantService implements BaseService{
 
 	@Override
 	public ResponseMessage patch(RequestMessage request) {
-		Tenant tenant = (Tenant) request.getBody();
-		tenant.setId(request.getId());
-		tenant = model.patch(tenant);
-		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), tenant);
+		Reseller reseller = (Reseller) request.getBody();
+		reseller.setId(request.getId());
+		reseller = model.patch(reseller);
+		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), reseller);
 	}
 }

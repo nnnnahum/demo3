@@ -1,6 +1,7 @@
 package com.demo.utils;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +40,12 @@ public class AuthUtil {
 		User user = getUserFromRequestHeader(request);
 		if(user == null) return false;
 		// if this is a super user then return true;
-		if(RoleService.SUPER_ADMIN_ROLE_ID.equals(user.getRole().getId())) {
-			return true;
-		}
+		if(user.getRoles().stream().map(x -> x.getId())
+				.filter(Set.of(RoleService.SUPER_ADMIN_ROLE_ID)::contains).count() > 0) return true;
+		
 		// get the org associated with the user and check if the role can perform the permission
-		return doesOrgHavePermissionForRole(org.getPerms(), user.getRole().getId(), acceptablePermission);
+		return doesOrgHavePermissionForRole(org.getPerms(), 
+				user.getRoles().stream().map(x -> x.getId()).toList(), acceptablePermission);
 	}
 
 	private User getUserFromRequestHeader(RequestMessage request) {
@@ -68,11 +70,11 @@ public class AuthUtil {
 		return (User)response.getBody();
 	}
 
-	private static boolean doesOrgHavePermissionForRole(List<PermissionOnEntity> perms, UUID roleId,
+	private static boolean doesOrgHavePermissionForRole(List<PermissionOnEntity> perms, List<UUID> roleIds,
 			List<Permission> acceptablePermissions) {
 		for (PermissionOnEntity perm: perms) {
 			for(Permission accepted: acceptablePermissions) {
-				if(roleId.equals(perm.getRoleId()) && perm.getPermission() == accepted) {
+				if(roleIds.contains(perm.getRoleId()) && perm.getPermission() == accepted) {
 					return true;
 				}
 			}
@@ -87,8 +89,9 @@ public class AuthUtil {
 	public Params appendQueryForTenantPermissions(RequestMessage request, String parentField) {
 		User user = getUserFromRequestHeader(request);
 		
-		if(RoleService.SUPER_ADMIN_ROLE_ID.equals(user.getRole().getId())) {
-			// this is hte super admin, no need to append anything
+		// this is the super admin, no need to append anything
+		if(user.getRoles().stream().map(x -> x.getId())
+				.filter(Set.of(RoleService.SUPER_ADMIN_ROLE_ID)::contains).count() > 0) {
 			return request.getQuery();
 		}
 		

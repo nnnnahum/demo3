@@ -1,4 +1,4 @@
-package com.demo.tenants;
+package com.demo.customers;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -15,24 +15,24 @@ import com.demo.db.MongoDBClient;
 import com.demo.db.MongoStoreUtil;
 import com.demo.db.Store;
 
-import entities.Tenant;
+import entities.Customer;
 import entities.requests.Params;
 
 @Service
-public class TenantStore implements Store<Tenant> {
+public class CustomerStore implements Store<Customer> {
 
-	private static final String COLLECTION_NAME = "tenants";
+	private static final String COLLECTION_NAME = "customers";
 
 	@Autowired
 	MongoDBClient ops;
 	
 	@Override
-	public Tenant post(Tenant tenant) {
+	public Customer post(Customer tenant) {
 		return ops.getMongoOperations().insert(tenant);
 	}
 
 	@Override
-	public Tenant put(UUID id, Tenant tenant) {
+	public Customer put(UUID id, Customer tenant) {
 	    
 		return ops.getMongoOperations().findAndReplace(
 				query(where("_id").is(id)), 
@@ -47,25 +47,25 @@ public class TenantStore implements Store<Tenant> {
 	}
 
 	@Override
-	public Tenant getById(UUID id) {
+	public Customer getById(UUID id) {
 		return ops.getMongoOperations().findById(
-				id, Tenant.class);
+				id, Customer.class);
 	}
 
 	@Override
-	public List<Tenant> get(Params query) {
-		Query mongoQuery = MongoStoreUtil.getQuery(query, Tenant.class);
-		return ops.getMongoOperations().find(mongoQuery, Tenant.class);
+	public List<Customer> get(Params query) {
+		Query mongoQuery = MongoStoreUtil.getQuery(query, Customer.class);
+		return ops.getMongoOperations().find(mongoQuery, Customer.class);
 	}
 
 	@Override
 	public long count(Params query) {
-		Query mongoQuery = MongoStoreUtil.getQueryForCount(query, Tenant.class);
-		return ops.getMongoOperations().count(mongoQuery, Tenant.class);
+		Query mongoQuery = MongoStoreUtil.getQueryForCount(query, Customer.class);
+		return ops.getMongoOperations().count(mongoQuery, Customer.class);
 	}
 	
 	@Override
-	public Tenant patch(Tenant tenant) {
+	public Customer patch(Customer tenant) {
 		Update update = new Update();
 		if(tenant.getName() != null && !tenant.getName().isEmpty()) {
 			update.set("name", tenant.getName());
@@ -73,6 +73,6 @@ public class TenantStore implements Store<Tenant> {
 		if(tenant.getPerms() != null) {
 			update.set("perms", tenant.getPerms());
 		}
-		return ops.getMongoOperations().findAndModify(query(where("_id").is(tenant.getId())), update, Tenant.class, COLLECTION_NAME);
+		return ops.getMongoOperations().findAndModify(query(where("_id").is(tenant.getId())), update, Customer.class, COLLECTION_NAME);
 	}
 }

@@ -24,9 +24,9 @@ import entities.Location;
 import entities.Organization;
 import entities.Permission;
 import entities.PermissionOnEntity;
-import entities.Provider;
+import entities.HostingProvider;
 import entities.Role;
-import entities.Tenant;
+import entities.Customer;
 import entities.requests.Count;
 import entities.requests.ErrorMessage;
 import entities.requests.FieldValidationErrorMessage;
@@ -61,7 +61,7 @@ public class RoleService implements BaseService{
 	@PostConstruct
 	public void start() {
 		router.registerRoute(Role.RESOURCE, this);
-		router.registerEventsOfInterest(EventsOfInterest.tenant_created, this);
+		router.registerEventsOfInterest(EventsOfInterest.customer_created, this);
 		router.registerEventsOfInterest(EventsOfInterest.provider_created, this);
 		
 		if(model.getById(SUPER_ADMIN_ROLE_ID) == null) {
@@ -81,7 +81,7 @@ public class RoleService implements BaseService{
 		
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(role.getOrg().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_ROLES))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -127,7 +127,7 @@ public class RoleService implements BaseService{
 		}
 		if(request.getSource() != Location.LOCAL){
 			Organization org = orgUtil.getOrgfromOrgId(role.getOrg().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE, Permission.VIEW))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_ROLES, Permission.VIEW_ROLES))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -146,7 +146,7 @@ public class RoleService implements BaseService{
 		
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(role.getOrg().getId());
-				if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+				if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_ROLES))) {
 					return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 							request.getHeaders(), 
 							"Unaurothized operation.");
@@ -178,7 +178,7 @@ public class RoleService implements BaseService{
 		Role existingRole = model.getById(request.getId());
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(existingRole.getOrg().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_ROLES))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -205,12 +205,12 @@ public class RoleService implements BaseService{
 	@Override
 	public void notify(EventsOfInterest eventName, BaseEntity entity) {
 		switch(eventName) {
-		case tenant_created:
-			Tenant tenant = (Tenant) entity;
-			createDefaultRolesForTenant(tenant);
+		case customer_created:
+			Customer customer = (Customer) entity;
+			createDefaultRolesForCustomer(customer);
 			return;
 		case provider_created:
-			Provider provider = (Provider) entity;
+			HostingProvider provider = (HostingProvider) entity;
 			createDefaultRolesForProvider(provider);
 			return;
 		default:
@@ -219,7 +219,7 @@ public class RoleService implements BaseService{
 		}
 	}
 
-	private void createDefaultRolesForProvider(Provider provider) {
+	private void createDefaultRolesForProvider(HostingProvider provider) {
 		// create admin and read only roles for the new provider. Patch the provider with the new permissions
 		UUID adminRoleId = UUID.randomUUID();
 		UUID viewRoleId = UUID.randomUUID();
@@ -227,14 +227,33 @@ public class RoleService implements BaseService{
 		
 		// patch provider permissions given the new roles.
 		List<PermissionOnEntity> providerPerms = provider.getPerms();
-		providerPerms.add(new PermissionOnEntity(Permission.MANAGE, adminRoleId));
-		providerPerms.add(new PermissionOnEntity(Permission.VIEW, viewRoleId));
+		getPermsForAdminRoleForProvider(providerPerms, adminRoleId);
+		getPermsForViewRoleForProvider(providerPerms, viewRoleId);
 		provider.setPerms(providerPerms);
-		ResponseMessage response = router.sendAndReceive(new RequestMessage(HttpMethod.PATCH, Provider.RESOURCE,
+		ResponseMessage response = router.sendAndReceive(new RequestMessage(HttpMethod.PATCH, HostingProvider.RESOURCE,
 				provider.getId(),  null,  null,  provider, Location.LOCAL, Location.LOCAL));
 		if(response.getStatus() != HttpStatus.OK) {
 			log.error("Error patching provider with new permissions");
 		}
+	}
+
+	private void getPermsForViewRoleForProvider(List<PermissionOnEntity> providerPerms, UUID viewRoleId) {
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_PROVIDERS, viewRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_LIBRARIES, viewRoleId));		
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, viewRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, viewRoleId));
+	}
+
+	private void getPermsForAdminRoleForProvider(List<PermissionOnEntity> providerPerms, UUID adminRoleId) {
+		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_PROVIDERS, adminRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_LIBRARIES, adminRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_USERS, adminRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_ROLES, adminRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_PROVIDERS, adminRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_LIBRARIES, adminRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, adminRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, adminRoleId));
+		
 	}
 
 	private void createRolesForOrg(Organization org, UUID adminUuid, UUID viewRoleId) {
@@ -244,23 +263,40 @@ public class RoleService implements BaseService{
 		model.post(role);
 	}
 
-	private void createDefaultRolesForTenant(Tenant tenant) {
+	private void createDefaultRolesForCustomer(Customer customer) {
 
-		// create admin and read only roles for the new tenant. Patch the tenant with the new permissions
+		// create admin and read only roles for the new customer. Patch the customer with the new permissions
 		UUID adminRoleId = UUID.randomUUID();
 		UUID viewRoleId = UUID.randomUUID();
-		createRolesForOrg(tenant, adminRoleId, viewRoleId);
+		createRolesForOrg(customer, adminRoleId, viewRoleId);
 		
-		// patch provider permissions given the new role.
-		List<PermissionOnEntity> tenantPerms = tenant.getPerms();
-		tenantPerms.add(new PermissionOnEntity(Permission.MANAGE, adminRoleId));
-		tenantPerms.add(new PermissionOnEntity(Permission.VIEW, viewRoleId));
-		tenant.setPerms(tenantPerms);
+		// patch customer permissions given the new roles.
+		List<PermissionOnEntity> customerPerms = customer.getPerms();
+		getPermsForAdminRoleForCustomer(customerPerms, adminRoleId);
+		getPermsForViewRoleForCustomer(customerPerms, viewRoleId);
+		customer.setPerms(customerPerms);
 		ResponseMessage response = router.sendAndReceive(new RequestMessage(HttpMethod.PATCH, 
-				Tenant.RESOURCE, tenant.getId(),  null,  null,  tenant, Location.LOCAL, Location.LOCAL));
+				Customer.RESOURCE, customer.getId(),  null,  null,  customer, Location.LOCAL, Location.LOCAL));
 		if(response.getStatus() != HttpStatus.OK) {
-			log.error("Error patching tenant with new permissions");
+			log.error("Error patching customer with new permissions");
 		}
+	}
+
+	private void getPermsForViewRoleForCustomer(List<PermissionOnEntity> customerPerms, UUID viewRoleId) {
+		customerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, viewRoleId));
+		customerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, viewRoleId));
+		customerPerms.add(new PermissionOnEntity(Permission.VIEW_SITES, viewRoleId));
+		customerPerms.add(new PermissionOnEntity(Permission.VIEW_CLOUD_LIBRARIES, viewRoleId));		
+	}
+
+	private void getPermsForAdminRoleForCustomer(List<PermissionOnEntity> customerPerms, UUID adminRoleId) {
+		customerPerms.add(new PermissionOnEntity(Permission.MANAGE_USERS, adminRoleId));
+		customerPerms.add(new PermissionOnEntity(Permission.MANAGE_ROLES, adminRoleId));
+		customerPerms.add(new PermissionOnEntity(Permission.MANAGE_CLOUD_LIBRARIES, adminRoleId));
+		customerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, adminRoleId));
+		customerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, adminRoleId));
+		customerPerms.add(new PermissionOnEntity(Permission.VIEW_SITES, adminRoleId));
+		customerPerms.add(new PermissionOnEntity(Permission.VIEW_CLOUD_LIBRARIES, adminRoleId));
 	}
 
 	@Override
@@ -271,7 +307,7 @@ public class RoleService implements BaseService{
 		Role existingRole = model.getById(role.getId());
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(existingRole.getOrg().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_ROLES))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");

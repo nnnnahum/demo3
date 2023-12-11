@@ -1,5 +1,6 @@
 package entities;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,13 +16,13 @@ public class User extends BaseEntity{
 	public User() {}
 	
 	public User(UUID id, String firstName, String lastName, String phoneNumber, 
-			String emailAddress, String password, Role role, Organization org) {
+			String emailAddress, String password, List<Role> roles, Organization org) {
 		super(id);
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.emailAddress = emailAddress;
 		this.password = password;
-		this.role = role;
+		this.roles = roles;
 		this.org = org;
 	}
 	
@@ -31,7 +32,7 @@ public class User extends BaseEntity{
 
 	@JsonInclude(Include.NON_NULL)
 	String password;
-	Role role;
+	List<Role> roles;
 	Organization org;
 
 	public String getFirstName() {
@@ -59,12 +60,12 @@ public class User extends BaseEntity{
 		this.password = password;
 	}
 
-	public Role getRole() {
-		return role;
+	public List<Role> getRoles() {
+		return roles;
 	}
 
-	public void setRole(Role role) {
-		this.role = role;
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
 	}
 	public Organization getOrg() {
 		return org;

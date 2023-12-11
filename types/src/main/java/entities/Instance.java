@@ -11,7 +11,7 @@ public class Instance extends BaseEntity {
 	public Instance(UUID id, String currentUsage, String currentCapacity,
 			Integer cpuTotal, Integer cpuAvailable, 
 			Double ramTotal, Double ramAvailable,
-			Tenant tenant, Host host, Datacenter datacenter) {
+			Customer tenant, Host host, Datacenter datacenter) {
 		super(id);
 		this.currentUsage = currentUsage;
 		this.currentCapacity = currentCapacity;
@@ -26,7 +26,7 @@ public class Instance extends BaseEntity {
 	private Integer cpuAvailable;
 	private Double ramTotal;
 	private Double ramAvailable;
-	private Tenant tenant;
+	private Customer tenant;
 	private Host host;
 	private Datacenter datacenter;
 		
@@ -75,11 +75,11 @@ public class Instance extends BaseEntity {
 		this.ramAvailable = ramAvailable;
 	}
 
-	public Tenant getTenant() {
+	public Customer getTenant() {
 		return tenant;
 	}
 
-	public void setTenant(Tenant tenant) {
+	public void setTenant(Customer tenant) {
 		this.tenant = tenant;
 	}
 

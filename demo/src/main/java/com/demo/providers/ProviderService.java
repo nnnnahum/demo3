@@ -1,5 +1,6 @@
 package com.demo.providers;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,10 +12,15 @@ import org.springframework.stereotype.Component;
 
 import com.demo.router.BaseService;
 import com.demo.router.MessageRouter;
+import com.demo.utils.AuthUtil;
+import com.demo.utils.OrgUtil;
 
 import entities.BaseEntity;
 import entities.EventsOfInterest;
-import entities.Provider;
+import entities.HostingProvider;
+import entities.Location;
+import entities.Organization;
+import entities.Permission;
 import entities.requests.Count;
 import entities.requests.ErrorMessage;
 import entities.requests.FieldValidationErrorMessage;
@@ -33,24 +39,39 @@ public class ProviderService implements BaseService{
 	@Autowired
 	ProviderModel model;
 	
+	@Autowired
+	AuthUtil authUtil;
+	
+	@Autowired
+	OrgUtil orgUtil;
+	
 	@PostConstruct
 	public void start() {
-		router.registerRoute(Provider.RESOURCE, this);
+		router.registerRoute(HostingProvider.RESOURCE, this);
 	}
 		
 	public ResponseMessage post(RequestMessage request) {
-		Provider provider = (Provider) request.getBody();
+		HostingProvider provider = (HostingProvider) request.getBody();
 		provider.setId(UUID.randomUUID());
 		FieldValidationErrorMessage fvem = validateProvider(provider, request.getHeaders());
 		if(fvem != null) {
 			return fvem;
 		}
 		
+		if(request.getSource() != Location.LOCAL) {
+			Organization org = orgUtil.getOrgfromOrgId(provider.getId());
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_PROVIDERS))) {
+				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
+						request.getHeaders(), 
+						"Unaurothized operation.");
+			}
+		}
+		
 		// make sure there isn't another provider with the same name
 		Params emailCheck = new Params();
 		emailCheck.setQuery("name==" + provider.getName()
 						+ ";id!=" + provider.getId());
-		List<Provider> providers = model.get(emailCheck);
+		List<HostingProvider> providers = model.get(emailCheck);
 		if(providers != null && !providers.isEmpty()) {
 			return new ErrorMessage(HttpStatus.CONFLICT, 
 					request.getHeaders(), 
@@ -63,7 +84,7 @@ public class ProviderService implements BaseService{
 		return new ResponseMessage(HttpStatus.CREATED, request.getHeaders(), provider);
 	}
 	
-	private FieldValidationErrorMessage validateProvider(Provider provider, Params headers) {
+	private FieldValidationErrorMessage validateProvider(HostingProvider provider, Params headers) {
 		FieldValidationErrorMessage fvem = null;
 		
 		if(provider.getName() == null || provider.getName().isEmpty()) {
@@ -74,7 +95,7 @@ public class ProviderService implements BaseService{
 	}
 
 	public ResponseMessage getById(RequestMessage request) {
-		Provider provider = model.getById(request.getId());
+		HostingProvider provider = model.getById(request.getId());
 		if(provider == null) {
 			return new ErrorMessage(HttpStatus.NOT_FOUND, request.getHeaders(), 
 					"Provider not found with Id: " + request.getId());
@@ -83,7 +104,7 @@ public class ProviderService implements BaseService{
 	}
 	
 	public ResponseMessage put(RequestMessage request) {
-		Provider provider = (Provider) request.getBody();
+		HostingProvider provider = (HostingProvider) request.getBody();
 		provider.setId(request.getId());
 		FieldValidationErrorMessage fvem = validateProvider(provider, request.getHeaders());
 		if(fvem != null) {
@@ -94,7 +115,7 @@ public class ProviderService implements BaseService{
 		Params emailCheck = new Params();
 		emailCheck.setQuery("name==" + provider.getName()
 						+ ";id!=" + provider.getId());
-		List<Provider> providers = model.get(emailCheck);
+		List<HostingProvider> providers = model.get(emailCheck);
 		if(providers != null && !providers.isEmpty()) {
 			return new ErrorMessage(HttpStatus.CONFLICT, 
 					request.getHeaders(), 
@@ -116,7 +137,7 @@ public class ProviderService implements BaseService{
 			return getById(request);
 		}
 		Params query = request.getQuery();
-		List<Provider> providers = model.get(query);
+		List<HostingProvider> providers = model.get(query);
 		long count = model.count(query);
 		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), providers, 
 				new Count((long)providers.size(), count));
@@ -130,7 +151,7 @@ public class ProviderService implements BaseService{
 
 	@Override
 	public ResponseMessage patch(RequestMessage request) {
-		Provider provider = (Provider) request.getBody();
+		HostingProvider provider = (HostingProvider) request.getBody();
 		provider.setId(request.getId());
 		provider = model.patch(provider);
 		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), provider);

@@ -16,11 +16,11 @@ import com.demo.db.MongoStoreUtil;
 import com.demo.db.Store;
 
 import entities.Host;
-import entities.Provider;
+import entities.HostingProvider;
 import entities.requests.Params;
 
 @Service
-public class ProviderStore implements Store<Provider> {
+public class ProviderStore implements Store<HostingProvider> {
 
 	private static final String COLLECTION_NAME = "providers";
 
@@ -28,12 +28,12 @@ public class ProviderStore implements Store<Provider> {
 	MongoDBClient ops;
 	
 	@Override
-	public Provider post(Provider provider) {
+	public HostingProvider post(HostingProvider provider) {
 		return ops.getMongoOperations().insert(provider);
 	}
 
 	@Override
-	public Provider put(UUID id, Provider provider) {
+	public HostingProvider put(UUID id, HostingProvider provider) {
 	    
 		return ops.getMongoOperations().findAndReplace(
 				query(where("_id").is(id)), 
@@ -48,25 +48,25 @@ public class ProviderStore implements Store<Provider> {
 	}
 
 	@Override
-	public Provider getById(UUID id) {
+	public HostingProvider getById(UUID id) {
 		return ops.getMongoOperations().findById(
-				id, Provider.class);
+				id, HostingProvider.class);
 	}
 
 	@Override
-	public List<Provider> get(Params query) {
-		Query mongoQuery = MongoStoreUtil.getQuery(query, Provider.class);
-		return ops.getMongoOperations().find(mongoQuery, Provider.class);
+	public List<HostingProvider> get(Params query) {
+		Query mongoQuery = MongoStoreUtil.getQuery(query, HostingProvider.class);
+		return ops.getMongoOperations().find(mongoQuery, HostingProvider.class);
 	}
 
 	@Override
 	public long count(Params query) {
-		Query mongoQuery = MongoStoreUtil.getQueryForCount(query, Provider.class);
-		return ops.getMongoOperations().count(mongoQuery, Provider.class);
+		Query mongoQuery = MongoStoreUtil.getQueryForCount(query, HostingProvider.class);
+		return ops.getMongoOperations().count(mongoQuery, HostingProvider.class);
 	}
 	
 	@Override
-	public Provider patch(Provider provider) {
+	public HostingProvider patch(HostingProvider provider) {
 		Update update = new Update();
 		if(provider.getName() != null && !provider.getName().isEmpty()) {
 			update.set("name", provider.getName());
@@ -74,6 +74,6 @@ public class ProviderStore implements Store<Provider> {
 		if(provider.getPerms() != null) {
 			update.set("perms", provider.getPerms());
 		}
-		return ops.getMongoOperations().findAndModify(query(where("_id").is(provider.getId())), update, Provider.class, COLLECTION_NAME);
+		return ops.getMongoOperations().findAndModify(query(where("_id").is(provider.getId())), update, HostingProvider.class, COLLECTION_NAME);
 	}
 }

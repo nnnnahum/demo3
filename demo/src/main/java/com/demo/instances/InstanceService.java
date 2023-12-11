@@ -69,7 +69,7 @@ public class InstanceService implements BaseService {
 		
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(instance.getTenant().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_CLOUD_LIBRARIES))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -142,7 +142,7 @@ public class InstanceService implements BaseService {
 		
 		if(request.getSource() != Location.LOCAL){
 			Organization org = orgUtil.getOrgfromOrgId(instance.getTenant().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE, Permission.VIEW))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_CLOUD_LIBRARIES, Permission.VIEW_CLOUD_LIBRARIES))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -163,7 +163,7 @@ public class InstanceService implements BaseService {
 
 		if(request.getSource() != Location.LOCAL) {
 		Organization org = orgUtil.getOrgfromOrgId(instance.getTenant().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_CLOUD_LIBRARIES))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -178,7 +178,7 @@ public class InstanceService implements BaseService {
 		Instance existingInstance = model.getById(request.getId());
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(existingInstance.getTenant().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_CLOUD_LIBRARIES))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");
@@ -217,7 +217,7 @@ public class InstanceService implements BaseService {
 		Instance existingInstnace = model.getById(instance.getId());
 		if(request.getSource() != Location.LOCAL) {
 			Organization org = orgUtil.getOrgfromOrgId(existingInstnace.getTenant().getId());
-			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE))) {
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_CLOUD_LIBRARIES))) {
 				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
 						request.getHeaders(), 
 						"Unaurothized operation.");

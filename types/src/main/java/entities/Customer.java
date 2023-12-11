@@ -5,16 +5,16 @@ import java.util.UUID;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "tenants")
-public class Tenant extends Organization{
+@Document(collection = "customers")
+public class Customer extends Organization{
 	
-	public static final String RESOURCE = "/tenants";
+	public static final String RESOURCE = "/customers";
 
 	List<Instance> instances;
 
-	public Tenant() {}
+	public Customer() {}
 	
-	public Tenant(UUID id, String name, List<PermissionOnEntity> perms) {
+	public Customer(UUID id, String name, List<PermissionOnEntity> perms) {
 		super(id, name, perms);
 	}
 	

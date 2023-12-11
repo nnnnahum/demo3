@@ -11,8 +11,9 @@ import com.demo.router.MessageRouter;
 
 import entities.Location;
 import entities.Organization;
-import entities.Provider;
-import entities.Tenant;
+import entities.Reseller;
+import entities.HostingProvider;
+import entities.Customer;
 import entities.requests.RequestMessage;
 import entities.requests.ResponseMessage;
 
@@ -24,14 +25,19 @@ public class OrgUtil {
 	
 	public Organization getOrgfromOrgId(UUID orgId) {
 		ResponseMessage responseMessage = router.sendAndReceive(new RequestMessage(HttpMethod.GET, 
-				Tenant.RESOURCE, orgId, null,  null, null, Location.LOCAL, Location.LOCAL));
+				Customer.RESOURCE, orgId, null,  null, null, Location.LOCAL, Location.LOCAL));
 		if(responseMessage.getStatus() == HttpStatus.OK) {
-			return (Tenant) responseMessage.getBody();
+			return (Customer) responseMessage.getBody();
 		}
 		responseMessage = router.sendAndReceive(new RequestMessage(HttpMethod.GET, 
-				Provider.RESOURCE, orgId, null,  null, null, Location.LOCAL, Location.LOCAL));
+				HostingProvider.RESOURCE, orgId, null,  null, null, Location.LOCAL, Location.LOCAL));
 		if(responseMessage.getStatus() == HttpStatus.OK) {
-			return (Provider) responseMessage.getBody();
+			return (HostingProvider) responseMessage.getBody();
+		}
+		responseMessage = router.sendAndReceive(new RequestMessage(HttpMethod.GET, 
+				Reseller.RESOURCE, orgId, null,  null, null, Location.LOCAL, Location.LOCAL));
+		if(responseMessage.getStatus() == HttpStatus.OK) {
+			return (Reseller) responseMessage.getBody();
 		}
 		return null;
 	}
