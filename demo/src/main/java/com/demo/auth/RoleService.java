@@ -242,6 +242,7 @@ public class RoleService implements BaseService{
 		providerPerms.add(new PermissionOnEntity(Permission.VIEW_LIBRARIES, viewRoleId));		
 		providerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, viewRoleId));
 		providerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, viewRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_DATACENTERS, viewRoleId));		
 	}
 
 	private void getPermsForAdminRoleForProvider(List<PermissionOnEntity> providerPerms, UUID adminRoleId) {
@@ -249,11 +250,13 @@ public class RoleService implements BaseService{
 		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_LIBRARIES, adminRoleId));
 		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_USERS, adminRoleId));
 		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_ROLES, adminRoleId));
+		providerPerms.add(new PermissionOnEntity(Permission.MANAGE_DATACENTERS, adminRoleId));
+
 		providerPerms.add(new PermissionOnEntity(Permission.VIEW_PROVIDERS, adminRoleId));
 		providerPerms.add(new PermissionOnEntity(Permission.VIEW_LIBRARIES, adminRoleId));
 		providerPerms.add(new PermissionOnEntity(Permission.VIEW_USERS, adminRoleId));
 		providerPerms.add(new PermissionOnEntity(Permission.VIEW_ROLES, adminRoleId));
-		
+		providerPerms.add(new PermissionOnEntity(Permission.VIEW_DATACENTERS, adminRoleId));		
 	}
 
 	private void createRolesForOrg(Organization org, UUID adminUuid, UUID viewRoleId) {
