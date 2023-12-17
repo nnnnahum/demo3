@@ -152,7 +152,7 @@ public class AuthUtil {
 //			queryStr = "name==cyxtera";
 //			queryStr = "perms.permission==" + viewProviders.name() + ";perms.roleId=="+user.getRole().getId();
 		} else {
-			queryStr += ";perms.permission==" + viewProviders.name() + ";perms.roleId=="+user.getRole().getId();
+			queryStr += ";perms=em=(permission:"+viewProviders.name() +",roleId:"+user.getRole().getId() +")";
 		}
 		query.put(Params.QUERY, queryStr);
 		return query;
