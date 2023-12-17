@@ -71,8 +71,7 @@ public class CustomerService implements BaseService{
 		}
 
 		User userCreatingCustomer = authUtil.getUserFromSession(request);
-		// TODO fix that we slap the first role. Should probably be the role that actually had the ability to manage customers on this org
-		customer.getPerms().add(new PermissionOnEntity(Permission.MANAGE_USERS, userCreatingCustomer.getRoles().get(0).getId()));
+		customer.getPerms().add(new PermissionOnEntity(Permission.MANAGE_USERS, userCreatingCustomer.getRole().getId()));
 		customer = model.post(customer);
 		router.notify(EventsOfInterest.customer_created, customer);
 		return new ResponseMessage(HttpStatus.CREATED, request.getHeaders(), customer);

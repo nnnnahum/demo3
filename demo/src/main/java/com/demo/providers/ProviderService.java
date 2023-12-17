@@ -111,6 +111,15 @@ public class ProviderService implements BaseService{
 			return fvem;
 		}
 		
+		if(request.getSource() != Location.LOCAL) {
+			Organization org = orgUtil.getOrgfromOrgId(provider.getId());
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_PROVIDERS))) {
+				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
+						request.getHeaders(), 
+						"Unaurothized operation.");
+			}
+		}
+		
 		// make sure there isn't another provider with the same name
 		Params emailCheck = new Params();
 		emailCheck.setQuery("name==" + provider.getName()
@@ -128,6 +137,16 @@ public class ProviderService implements BaseService{
 	}
 	
 	public ResponseMessage delete(RequestMessage request) {
+		HostingProvider provider = model.getById(request.getId());
+		if(request.getSource() != Location.LOCAL) {
+			Organization org = orgUtil.getOrgfromOrgId(provider.getId());
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_PROVIDERS))) {
+				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
+						request.getHeaders(), 
+						"Unaurothized operation.");
+			}
+		}
+		
 		model.delete(request.getId());
 		return new ResponseMessage(HttpStatus.NO_CONTENT, request.getHeaders(), null);
 	}
@@ -136,7 +155,7 @@ public class ProviderService implements BaseService{
 		if (request.getId() != null) {
 			return getById(request);
 		}
-		Params query = request.getQuery();
+		Params query = authUtil.appendQueryForOrgWithPermission(request, Permission.VIEW_PROVIDERS);
 		List<HostingProvider> providers = model.get(query);
 		long count = model.count(query);
 		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), providers, 
@@ -152,6 +171,16 @@ public class ProviderService implements BaseService{
 	@Override
 	public ResponseMessage patch(RequestMessage request) {
 		HostingProvider provider = (HostingProvider) request.getBody();
+		HostingProvider existingProvider = model.getById(request.getId());
+		if(request.getSource() != Location.LOCAL) {
+			Organization org = orgUtil.getOrgfromOrgId(existingProvider.getId());
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_PROVIDERS))) {
+				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
+						request.getHeaders(), 
+						"Unaurothized operation.");
+			}
+		}
+		
 		provider.setId(request.getId());
 		provider = model.patch(provider);
 		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), provider);

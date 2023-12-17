@@ -185,6 +185,9 @@ public class RoleService implements BaseService{
 						"Unaurothized operation.");
 			}
 		}
+		
+		// TODO: check if there are any users with this role associated to them.
+		// TODO: Check if there is any resource that become "unmanageable" by deleting this role.
 		model.delete(request.getId());
 		return new ResponseMessage(HttpStatus.NO_CONTENT, request.getHeaders(), null);
 	}
@@ -229,7 +232,6 @@ public class RoleService implements BaseService{
 		UUID adminRoleId = UUID.randomUUID();
 		UUID viewRoleId = UUID.randomUUID();
 		
-		//TODO: set default perms for the roles. 
 		createRolesForOrg(reseller, adminRoleId, viewRoleId);
 		
 		// patch provider permissions given the new roles.

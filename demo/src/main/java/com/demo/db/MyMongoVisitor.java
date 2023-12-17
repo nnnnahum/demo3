@@ -26,7 +26,7 @@ public class MyMongoVisitor extends MongoVisitor{
     protected Criteria visit(ComparisonNode node) {
 
         ComparisonOperator operator = node.getOperator();
-
+        ComparisonOperator em = new ComparisonOperator("=em=");
         Collection<?> values = node.getValues().stream().map(normalizer).collect(Collectors.toList());
         String field = node.getField().asKey();
 
@@ -56,6 +56,8 @@ public class MyMongoVisitor extends MongoVisitor{
             return where(field).regex((String)single(values));
         } else if (ComparisonOperator.SUB_CONDITION_ANY.equals(operator)) {
             return where(field).elemMatch(condition(node));
+        }else if (em.equals(operator)) {
+        	return where(field).elemMatch(condition(node));
         }
 
         throw new UnsupportedOperationException("This visitor does not support the operator " + operator + ".");

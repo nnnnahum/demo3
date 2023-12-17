@@ -66,7 +66,7 @@ public class UserService implements BaseService{
 							RoleService.SUPER_ADMIN_ROLE_ID, null, null, null, Location.LOCAL, Location.LOCAL));
 			Role role = (Role)response.getBody();
 			//create super admin user
-			User user = new User(SUPERUSERID, "Super", "BARADAZ", null, "admin@baradaz.com", PasswordEncrypter.encrypt("abc123"), Arrays.asList(role), null);
+			User user = new User(SUPERUSERID, "Super", "BARADAZ", null, "admin@baradaz.com", PasswordEncrypter.encrypt("abc123"), role, null);
 			model.post(user);
 		}
 	}
@@ -126,6 +126,10 @@ public class UserService implements BaseService{
 			fvem = FieldValidationErrorMessage.addError(fvem, headers, "password");
 		}
 		
+		if(user.getRole() == null || user.getRole().getId() == null) {
+			fvem = FieldValidationErrorMessage.addError(fvem, headers, "role.id");
+		}
+
 		if(user.getOrg() == null || user.getOrg().getId() == null) {
 			fvem = FieldValidationErrorMessage.addError(fvem, headers, "org.id");
 		}

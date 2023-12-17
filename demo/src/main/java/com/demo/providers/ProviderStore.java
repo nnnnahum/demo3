@@ -6,7 +6,9 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 import java.util.List;
 import java.util.UUID;
 
+import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,8 @@ public class ProviderStore implements Store<HostingProvider> {
 	@Override
 	public List<HostingProvider> get(Params query) {
 		Query mongoQuery = MongoStoreUtil.getQuery(query, HostingProvider.class);
+//		mongoQuery = new Query();
+//		mongoQuery.addCriteria(Criteria.where("perms").elemMatch(Criteria.where("permission").is("VIEW_USERS").and("roleId").exists(true)));
 		return ops.getMongoOperations().find(mongoQuery, HostingProvider.class);
 	}
 

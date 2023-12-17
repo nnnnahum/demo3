@@ -33,7 +33,7 @@ public class SessionService implements BaseService{
 
 	public static final String PATH = "/sessions";
 	
-	private static final Logger log = LoggerFactory.getLogger(RoleService.class);
+	private static final Logger log = LoggerFactory.getLogger(SessionService.class);
 	
 	@Autowired
 	MessageRouter router;

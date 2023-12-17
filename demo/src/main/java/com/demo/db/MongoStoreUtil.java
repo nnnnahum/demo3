@@ -1,5 +1,9 @@
 package com.demo.db;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -45,15 +49,53 @@ public class MongoStoreUtil {
 	}
 	
 	public static Query getQueryForCount(Params params, Class c) {
-		QueryConversionPipeline pipeline = 
-				QueryConversionPipeline.defaultPipeline();
+		QueryConversionPipeline pipeline = QueryConversionPipeline.builder()
+				.useNonDefaultParsingPipe(new CustomParsingPipe())
+				.build();
 		
 	    Query query = new Query();
-		if(params.getQuery() != null && !params.getQuery().isEmpty()) {
-			Condition<GeneralQueryBuilder> condition = pipeline.apply(params.getQuery(), c);
-		    Criteria criteria = condition.query(new MyMongoVisitor());
-		    query.addCriteria(criteria);
+	    String queryStr = params.getQuery();
+	    if(queryStr == null || queryStr.isEmpty()) return query;
+	    String generateCondition = queryStr;
+	    Criteria forEM = null;
+	    if(queryStr.contains("=em=")) {
+	    	if(queryStr.contains(";")){
+	    		generateCondition = queryStr.substring(0, queryStr.lastIndexOf(";"));
+	    	} else {
+	    		generateCondition = "";
+	    	}
+	    	String emCondition = queryStr.substring(queryStr.lastIndexOf(";") + 1);
+	    	String [] elemMatch = emCondition.split("=em=");
+	    	String criteriaStr = elemMatch[1];
+	    	if(criteriaStr.startsWith("(")) {
+	    		criteriaStr = criteriaStr.substring(1);
+	    	} 
+	    	if(criteriaStr.endsWith(")")) {
+	    		criteriaStr = criteriaStr.substring(0, criteriaStr.length() - 1);
+	    	}
+	    	String [] criteriaPieces = criteriaStr.split(",");
+	    	
+	    	forEM = Criteria.where(elemMatch[0]);
+	    	Criteria inside = null;
+	    	for(String piece : criteriaPieces) {
+	    		String [] pieces = piece.split(":");
+	    		if(inside == null) {
+	    			inside = Criteria.where(pieces[0]).is(pieces[1]);
+	    		} else {
+	    			inside.and(pieces[0]).is(pieces[1]);
+	    		}
+	    	}
+    		forEM.elemMatch(inside);
 		}
+	    Criteria criteria = null;
+	    if(generateCondition != null && !generateCondition.isEmpty()) {
+			Condition<GeneralQueryBuilder> condition = pipeline.apply(generateCondition, c);
+		    criteria = condition.query(new MyMongoVisitor());
+	    }
+	    if(forEM != null) {
+	    	if(criteria == null) criteria = forEM;
+	    }
+	    query.addCriteria(criteria);
 		
 		return query;
 	}

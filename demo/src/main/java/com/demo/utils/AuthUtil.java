@@ -1,9 +1,12 @@
 package com.demo.utils;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -13,10 +16,13 @@ import com.demo.auth.RoleService;
 import com.demo.auth.SessionService;
 import com.demo.router.MessageRouter;
 
+import entities.Customer;
+import entities.HostingProvider;
 import entities.Location;
 import entities.Organization;
 import entities.Permission;
 import entities.PermissionOnEntity;
+import entities.Reseller;
 import entities.Session;
 import entities.User;
 import entities.requests.Params;
@@ -35,47 +41,26 @@ public class AuthUtil {
 	
 	@Autowired
     MessageRouter router;
+	
+	private static final Logger log = LoggerFactory.getLogger(RoleService.class);
 
 	public boolean hasPermissionInOrg(RequestMessage request, Organization org, List<Permission> acceptablePermission) {
-		User user = getUserFromRequestHeader(request);
+		User user = getUserFromSession(request);
 		if(user == null) return false;
 		// if this is a super user then return true;
-		if(user.getRoles().stream().map(x -> x.getId())
-				.filter(Set.of(RoleService.SUPER_ADMIN_ROLE_ID)::contains).count() > 0) return true;
+		if(user.getRole().getId().equals(RoleService.SUPER_ADMIN_ROLE_ID)) return true;
 		
 		if(org == null) return false;
 		// get the org associated with the user and check if the role can perform the permission
 		return doesOrgHavePermissionForRole(org.getPerms(), 
-				user.getRoles().stream().map(x -> x.getId()).toList(), acceptablePermission);
+				user.getRole().getId(), acceptablePermission);
 	}
 
-	private User getUserFromRequestHeader(RequestMessage request) {
-		if(request.getHeaders() == null || request.getHeaders().get("authId") == null) {
-			return null;
-		}
-		request.getBody();
-		String authId = request.getHeaders().get("authId");
-		UUID authUuid = UUID.fromString(authId);
-		RequestMessage requestForSession = new RequestMessage(HttpMethod.GET, Session.RESOURCE, 
-				authUuid, null, null, null, Location.LOCAL, Location.LOCAL);
-		ResponseMessage response = router.sendAndReceive(requestForSession);
-		if(response.getStatus() != HttpStatus.OK) {
-			return null;
-		}
-		Session session = (Session) response.getBody();
-		response = router.sendAndReceive(new RequestMessage(HttpMethod.GET, User.RESOURCE, 
-				session.getUserId(), null,  null, null, Location.LOCAL, Location.LOCAL));
-		if(response.getStatus() != HttpStatus.OK) {
-			return null;
-		}
-		return (User)response.getBody();
-	}
-
-	private static boolean doesOrgHavePermissionForRole(List<PermissionOnEntity> perms, List<UUID> roleIds,
+	private static boolean doesOrgHavePermissionForRole(List<PermissionOnEntity> perms, UUID roleId,
 			List<Permission> acceptablePermissions) {
 		for (PermissionOnEntity perm: perms) {
 			for(Permission accepted: acceptablePermissions) {
-				if(roleIds.contains(perm.getRoleId()) && perm.getPermission() == accepted) {
+				if(perm.getRoleId().equals(roleId) && perm.getPermission() == accepted) {
 					return true;
 				}
 			}
@@ -88,27 +73,49 @@ public class AuthUtil {
 	}
 
 	public Params appendQueryForTenantPermissions(RequestMessage request, String parentField) {
-		User user = getUserFromRequestHeader(request);
+		User user = getUserFromSession(request);
 		
 		// this is the super admin, no need to append anything
-		if(user.getRoles().stream().map(x -> x.getId())
-				.filter(Set.of(RoleService.SUPER_ADMIN_ROLE_ID)::contains).count() > 0) {
+		if(user.getRole().getId().equals(RoleService.SUPER_ADMIN_ROLE_ID)) {
 			return request.getQuery();
 		}
 		
-		// My user has a role. 
-		// I need all the orgs that my role can view or manage
-		// for now we are just going with "my org" since we can't share across orgs.
-		// append org.id=in(anyof the roles)
-		// for now assuming that if you are in the org you have at least view privilege on everything this 
-		// may change.
 		
-		Organization org = orgUtil.getOrgfromOrgId(user.getOrg().getId());
+		// fetch all the orgs I have access to with my session Id,
+		// providers, customers, resellers
+		List<UUID> orgIdsUserHasAccessTo = new ArrayList<UUID>();
+		Params headers = new Params();
+		headers.put("authId", request.getHeaders().get("authId"));
+		RequestMessage fetchProviders = new RequestMessage(HttpMethod.GET, HostingProvider.RESOURCE, null, null, headers, null, Location.MGMTAPI, Location.LOCAL);
+		ResponseMessage response = router.sendAndReceive(fetchProviders);
+		if(response.getStatus() == HttpStatus.OK) {
+			List<HostingProvider> providers = (List<HostingProvider>)response.getBody();
+			orgIdsUserHasAccessTo.addAll(providers.stream().map(x -> x.getId()).toList());
+		}
+		RequestMessage fetchCustomers = new RequestMessage(HttpMethod.GET, Customer.RESOURCE, null, null, headers, null, Location.MGMTAPI, Location.LOCAL);
+		response = router.sendAndReceive(fetchCustomers);
+		if(response.getStatus() == HttpStatus.OK) {
+			List<Customer> customers = (List<Customer>)response.getBody();
+			orgIdsUserHasAccessTo.addAll(customers.stream().map(x -> x.getId()).toList());
+		}
+		RequestMessage fetchResellers = new RequestMessage(HttpMethod.GET, Reseller.RESOURCE, null, null, headers, null, Location.MGMTAPI, Location.LOCAL);
+		response = router.sendAndReceive(fetchResellers);
+		if(response.getStatus() == HttpStatus.OK) {
+			List<Reseller> resellers = (List<Reseller>)response.getBody();
+			orgIdsUserHasAccessTo.addAll(resellers.stream().map(x -> x.getId()).toList());
+		}
+		
+		if(orgIdsUserHasAccessTo.isEmpty()) {
+			log.error("This user has no access.");
+		}
+	
 		Params query = request.getQuery();
 		if(query.get(Params.QUERY) == null) {
-			query.put(Params.QUERY, parentField + ".id==" + org.getId());
+			query.put(Params.QUERY, parentField + ".id=in=(" + orgIdsUserHasAccessTo.stream().map(x -> x.toString())
+			.collect(Collectors.joining(",")) + ")");
 		} else {
-			query.put(Params.QUERY, "(" + query.get(Params.QUERY) + ");" + parentField + ".id==" + org.getId());
+			query.put(Params.QUERY, "(" + query.get(Params.QUERY) + ");" + parentField + ".id=in=(" + orgIdsUserHasAccessTo.stream().map(x -> x.toString())
+					.collect(Collectors.joining(",")) + ")");
 		}
 		return query;
 	}
@@ -127,5 +134,27 @@ public class AuthUtil {
 		if(response.getStatus() != HttpStatus.OK) return null;
 		User user = (User) response.getBody();
 		return user;
+	}
+
+	public Params appendQueryForOrgWithPermission(RequestMessage request, Permission viewProviders) {
+		User user = getUserFromSession(request);
+		
+		// this is the super admin, no need to append anything
+		if(user.getRole().getId().equals(RoleService.SUPER_ADMIN_ROLE_ID)) {
+			return request.getQuery();
+		}
+		
+		//append to the query that the perms has an entry with the permission and role id of the user
+		Params query = request.getQuery();
+		String queryStr = query.getQuery();
+		if(queryStr == null || queryStr.isEmpty()) {
+			queryStr = "perms=em=(permission:"+viewProviders.name() +",roleId:"+user.getRole().getId() +")" ;
+//			queryStr = "name==cyxtera";
+//			queryStr = "perms.permission==" + viewProviders.name() + ";perms.roleId=="+user.getRole().getId();
+		} else {
+			queryStr += ";perms.permission==" + viewProviders.name() + ";perms.roleId=="+user.getRole().getId();
+		}
+		query.put(Params.QUERY, queryStr);
+		return query;
 	}
 }
