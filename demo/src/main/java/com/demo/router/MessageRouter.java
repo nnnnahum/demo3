@@ -5,16 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.demo.auth.RoleService;
 
 import entities.BaseEntity;
 import entities.EventsOfInterest;
+import entities.requests.ErrorMessage;
+import entities.requests.ErrorMessageException;
 import entities.requests.RequestMessage;
 import entities.requests.ResponseMessage;
+import jdk.internal.org.jline.utils.Log;
 
 @Service
 public class MessageRouter {
-		
+	private static final Logger log = LoggerFactory.getLogger(MessageRouter.class);
+	
 	private Map<String, BaseService> servicesAvailable = new HashMap<>();
 	
 	private Map<EventsOfInterest, List<BaseService>> eventsOfInterest = new HashMap<>();
@@ -37,7 +45,12 @@ public class MessageRouter {
 		case DELETE:
 			return service.delete(request);
 		case GET:
-			return service.get(request); 
+			try {
+				return service.get(request); 
+			} catch(ErrorMessageException e) {
+				log.error("Exception: ", e);
+				return new ErrorMessage(e);
+			}
 		case PATCH:
 			return service.patch(request);
 		case POST:

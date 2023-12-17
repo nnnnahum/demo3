@@ -29,6 +29,7 @@ import entities.Role;
 import entities.User;
 import entities.requests.Count;
 import entities.requests.ErrorMessage;
+import entities.requests.ErrorMessageException;
 import entities.requests.FieldValidationErrorMessage;
 import entities.requests.Params;
 import entities.requests.RequestMessage;
@@ -208,7 +209,7 @@ public class UserService implements BaseService{
 		return new ResponseMessage(HttpStatus.NO_CONTENT, request.getHeaders(), null);
 	}
 
-	public ResponseMessage get(RequestMessage request) {
+	public ResponseMessage get(RequestMessage request) throws ErrorMessageException{
 		if (request.getId() != null) {
 			return getById(request);
 		}

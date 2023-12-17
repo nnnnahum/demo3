@@ -20,7 +20,7 @@ import entities.requests.Params;
 public class MongoStoreUtil {
 
 	public static Query getQuery(Params params, Class c) {
-		
+	    if(params == null) params = new Params();
 	    Query query = getQueryForCount(params, c);
 	    		
 	    if(params.getSort() != null && !params.getSort().isEmpty()) {
@@ -52,7 +52,8 @@ public class MongoStoreUtil {
 		QueryConversionPipeline pipeline = QueryConversionPipeline.builder()
 				.useNonDefaultParsingPipe(new CustomParsingPipe())
 				.build();
-		
+	    if(params == null) params = new Params();
+
 	    Query query = new Query();
 	    String queryStr = params.getQuery();
 	    if(queryStr == null || queryStr.isEmpty()) return query;

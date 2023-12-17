@@ -30,6 +30,7 @@ import entities.Role;
 import entities.Customer;
 import entities.requests.Count;
 import entities.requests.ErrorMessage;
+import entities.requests.ErrorMessageException;
 import entities.requests.FieldValidationErrorMessage;
 import entities.requests.Params;
 import entities.requests.RequestMessage;
@@ -64,6 +65,7 @@ public class RoleService implements BaseService{
 		router.registerRoute(Role.RESOURCE, this);
 		router.registerEventsOfInterest(EventsOfInterest.customer_created, this);
 		router.registerEventsOfInterest(EventsOfInterest.provider_created, this);
+		router.registerEventsOfInterest(EventsOfInterest.reseller_created, this);
 		
 		if(model.getById(SUPER_ADMIN_ROLE_ID) == null) {
 			//create super admin role
@@ -192,7 +194,7 @@ public class RoleService implements BaseService{
 		return new ResponseMessage(HttpStatus.NO_CONTENT, request.getHeaders(), null);
 	}
 
-	public ResponseMessage get(RequestMessage request) {
+	public ResponseMessage get(RequestMessage request) throws ErrorMessageException{
 		if (request.getId() != null) {
 			return getById(request);
 		}
@@ -247,14 +249,14 @@ public class RoleService implements BaseService{
 	}
 
 	private void getPermsForViewRoleForReseller(List<PermissionOnEntity> resellerPerms, UUID viewRoleId) {
-		for(Permission perm: HostingProvider.defaultViewPermission) {
-			resellerPerms.add(new PermissionOnEntity(perm, viewRoleId));
+		for(Permission perm: Reseller.defaultViewPermission) {
+			resellerPerms.add(new PermissionOnEntity(perm, viewRoleId.toString()));
 		}
 	}
 
 	private void getPermsForAdminRoleForReseller(List<PermissionOnEntity> resellerPerms, UUID adminRoleId) {
-		for(Permission perm: HostingProvider.defaultAdminPermissions) {
-			resellerPerms.add(new PermissionOnEntity(perm, adminRoleId));
+		for(Permission perm: Reseller.defaultAdminPermissions) {
+			resellerPerms.add(new PermissionOnEntity(perm, adminRoleId.toString()));
 		}
 	}
 
@@ -278,13 +280,13 @@ public class RoleService implements BaseService{
 
 	private void getPermsForViewRoleForProvider(List<PermissionOnEntity> providerPerms, UUID viewRoleId) {
 		for(Permission perm: HostingProvider.defaultViewPermission) {
-			providerPerms.add(new PermissionOnEntity(perm, viewRoleId));
+			providerPerms.add(new PermissionOnEntity(perm, viewRoleId.toString()));
 		}		
 	}
 
 	private void getPermsForAdminRoleForProvider(List<PermissionOnEntity> providerPerms, UUID adminRoleId) {
 		for(Permission perm: HostingProvider.defaultAdminPermissions) {
-			providerPerms.add(new PermissionOnEntity(perm, adminRoleId));
+			providerPerms.add(new PermissionOnEntity(perm, adminRoleId.toString()));
 		}
 	}
 
@@ -316,13 +318,13 @@ public class RoleService implements BaseService{
 
 	private void getPermsForViewRoleForCustomer(List<PermissionOnEntity> customerPerms, UUID viewRoleId) {
 		for(Permission perm: Customer.defaultViewPermission) {
-			customerPerms.add(new PermissionOnEntity(perm, viewRoleId));
+			customerPerms.add(new PermissionOnEntity(perm, viewRoleId.toString()));
 		}	
 	}
 
 	private void getPermsForAdminRoleForCustomer(List<PermissionOnEntity> customerPerms, UUID adminRoleId) {
 		for(Permission perm: Customer.defaultAdminPermissions) {
-			customerPerms.add(new PermissionOnEntity(perm, adminRoleId));
+			customerPerms.add(new PermissionOnEntity(perm, adminRoleId.toString()));
 		}
 	}
 

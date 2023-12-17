@@ -71,7 +71,7 @@ public class CustomerService implements BaseService{
 		}
 
 		User userCreatingCustomer = authUtil.getUserFromSession(request);
-		customer.getPerms().add(new PermissionOnEntity(Permission.MANAGE_USERS, userCreatingCustomer.getRole().getId()));
+		customer.getPerms().add(new PermissionOnEntity(Permission.MANAGE_USERS, userCreatingCustomer.getRole().getId().toString()));
 		customer = model.post(customer);
 		router.notify(EventsOfInterest.customer_created, customer);
 		return new ResponseMessage(HttpStatus.CREATED, request.getHeaders(), customer);

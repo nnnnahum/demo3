@@ -25,6 +25,7 @@ import entities.PermissionOnEntity;
 import entities.Reseller;
 import entities.Session;
 import entities.User;
+import entities.requests.ErrorMessageException;
 import entities.requests.Params;
 import entities.requests.RequestMessage;
 import entities.requests.ResponseMessage;
@@ -42,7 +43,7 @@ public class AuthUtil {
 	@Autowired
     MessageRouter router;
 	
-	private static final Logger log = LoggerFactory.getLogger(RoleService.class);
+	private static final Logger log = LoggerFactory.getLogger(AuthUtil.class);
 
 	public boolean hasPermissionInOrg(RequestMessage request, Organization org, List<Permission> acceptablePermission) {
 		User user = getUserFromSession(request);
@@ -60,7 +61,7 @@ public class AuthUtil {
 			List<Permission> acceptablePermissions) {
 		for (PermissionOnEntity perm: perms) {
 			for(Permission accepted: acceptablePermissions) {
-				if(perm.getRoleId().equals(roleId) && perm.getPermission() == accepted) {
+				if(perm.getRoleId().equals(roleId.toString()) && perm.getPermission() == accepted) {
 					return true;
 				}
 			}
@@ -68,18 +69,17 @@ public class AuthUtil {
 		return false;
 	}
 
-	public Params appendQueryForOrgPermissions(RequestMessage request) {
+	public Params appendQueryForOrgPermissions(RequestMessage request) throws ErrorMessageException{
 		return this.appendQueryForTenantPermissions(request, "org") ;
 	}
 
-	public Params appendQueryForTenantPermissions(RequestMessage request, String parentField) {
+	public Params appendQueryForTenantPermissions(RequestMessage request, String parentField) throws ErrorMessageException{
 		User user = getUserFromSession(request);
 		
 		// this is the super admin, no need to append anything
 		if(user.getRole().getId().equals(RoleService.SUPER_ADMIN_ROLE_ID)) {
 			return request.getQuery();
 		}
-		
 		
 		// fetch all the orgs I have access to with my session Id,
 		// providers, customers, resellers
@@ -107,6 +107,7 @@ public class AuthUtil {
 		
 		if(orgIdsUserHasAccessTo.isEmpty()) {
 			log.error("This user has no access.");
+			throw new ErrorMessageException("Auth-001", "This user has no access");
 		}
 	
 		Params query = request.getQuery();
@@ -146,6 +147,7 @@ public class AuthUtil {
 		
 		//append to the query that the perms has an entry with the permission and role id of the user
 		Params query = request.getQuery();
+		query = query == null? new Params() : query;
 		String queryStr = query.getQuery();
 		if(queryStr == null || queryStr.isEmpty()) {
 			queryStr = "perms=em=(permission:"+viewProviders.name() +",roleId:"+user.getRole().getId() +")" ;

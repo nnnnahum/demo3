@@ -10,10 +10,14 @@ import org.springframework.stereotype.Component;
 
 import com.demo.router.BaseService;
 import com.demo.router.MessageRouter;
+import com.demo.utils.AuthUtil;
 
 import entities.BaseEntity;
 import entities.EventsOfInterest;
+import entities.Permission;
+import entities.PermissionOnEntity;
 import entities.Reseller;
+import entities.User;
 import entities.requests.Count;
 import entities.requests.ErrorMessage;
 import entities.requests.FieldValidationErrorMessage;
@@ -28,6 +32,9 @@ public class ResellerService implements BaseService{
 	
 	@Autowired
 	MessageRouter router;
+	
+	@Autowired
+	AuthUtil authUtil;
 	
 	@Autowired
 	ResellerModel model;
@@ -45,6 +52,8 @@ public class ResellerService implements BaseService{
 			return fvem;
 		}
 			
+		User userCreatingReseller = authUtil.getUserFromSession(request);
+		reseller.getPerms().add(new PermissionOnEntity(Permission.MANAGE_USERS, userCreatingReseller.getRole().getId().toString()));
 		reseller = model.post(reseller);
 		router.notify(EventsOfInterest.reseller_created, reseller);
 		return new ResponseMessage(HttpStatus.CREATED, request.getHeaders(), reseller);

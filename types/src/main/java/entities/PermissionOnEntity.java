@@ -1,26 +1,24 @@
 package entities;
 
-import java.util.UUID;
-
 public class PermissionOnEntity {
 
 	public PermissionOnEntity() {}
-	public PermissionOnEntity(Permission permission, UUID roleId) {
+	public PermissionOnEntity(Permission permission, String roleId) {
 		this.permission = permission;
 		this.roleId = roleId;
 	}
 	Permission permission;
-	UUID roleId;
+	String roleId;
 	public Permission getPermission() {
 		return permission;
 	}
 	public void setPermission(Permission permission) {
 		this.permission = permission;
 	}
-	public UUID getRoleId() {
+	public String getRoleId() {
 		return roleId;
 	}
-	public void setRoleId(UUID roleId) {
+	public void setRoleId(String roleId) {
 		this.roleId = roleId;
 	}
 }

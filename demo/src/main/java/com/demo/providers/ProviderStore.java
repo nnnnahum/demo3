@@ -59,7 +59,7 @@ public class ProviderStore implements Store<HostingProvider> {
 	public List<HostingProvider> get(Params query) {
 		Query mongoQuery = MongoStoreUtil.getQuery(query, HostingProvider.class);
 //		mongoQuery = new Query();
-//		mongoQuery.addCriteria(Criteria.where("perms").elemMatch(Criteria.where("permission").is("VIEW_USERS").and("roleId").exists(true)));
+//		mongoQuery.addCriteria(Criteria.where("perms").elemMatch(Criteria.where("permission").is("VIEW_PROVIDERS").and("roleId").exists(true)));
 		return ops.getMongoOperations().find(mongoQuery, HostingProvider.class);
 	}
 
