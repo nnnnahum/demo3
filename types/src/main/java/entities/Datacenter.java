@@ -1,27 +1,45 @@
 package entities;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "datacenters")
-public class Datacenter extends BaseEntity{
+public class Datacenter extends Organization{
 
 	public static final String RESOURCE = "/datacenters";
 
 	private String geo;
-	private String name;
 	private HostingProvider provider;
 	private LatLong latlong;
 	private AggregatedHostMetrics datacenterMetrics;
 	
+	public static final Set<Permission> defaultAdminPermissions = Stream.of(
+			Permission.MANAGE_ROLES,
+			Permission.MANAGE_USERS,
+			Permission.MANAGE_TAPE_LIBRARIES,
+			Permission.VIEW_USERS,
+			Permission.VIEW_ROLES,
+			Permission.VIEW_TAPE_LIBRARIES)
+			  .collect(Collectors.toCollection(HashSet::new));
+	
+	public static final Set<Permission> defaultViewPermission = Stream.of(
+			Permission.VIEW_USERS,
+			Permission.VIEW_ROLES,
+			Permission.VIEW_TAPE_LIBRARIES)
+			.collect(Collectors.toCollection(HashSet::new));
+	
 	public Datacenter() {}
 	
-	public Datacenter(UUID id, String geo, String name, HostingProvider provider, LatLong latlong, 
+	public Datacenter(UUID id, String name, String geo, HostingProvider provider, LatLong latlong, List<PermissionOnEntity> perms,
 			AggregatedHostMetrics datacenterMetrcs) {
-		super(id);
+		super(id, name, perms);
 		this.geo = geo;
-		this.name = name;
 		this.provider = provider;
 		this.latlong = latlong;
 		this.datacenterMetrics = datacenterMetrcs;
@@ -32,12 +50,6 @@ public class Datacenter extends BaseEntity{
 	}
 	public void setGeo(String geo) {
 		this.geo = geo;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public HostingProvider getProvider() {

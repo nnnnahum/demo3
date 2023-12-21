@@ -28,6 +28,7 @@ import entities.Reseller;
 import entities.HostingProvider;
 import entities.Role;
 import entities.Customer;
+import entities.Datacenter;
 import entities.requests.Count;
 import entities.requests.ErrorMessage;
 import entities.requests.ErrorMessageException;
@@ -66,6 +67,7 @@ public class RoleService implements BaseService{
 		router.registerEventsOfInterest(EventsOfInterest.customer_created, this);
 		router.registerEventsOfInterest(EventsOfInterest.provider_created, this);
 		router.registerEventsOfInterest(EventsOfInterest.reseller_created, this);
+		router.registerEventsOfInterest(EventsOfInterest.datacenter_created, this);
 		
 		if(model.getById(SUPER_ADMIN_ROLE_ID) == null) {
 			//create super admin role
@@ -223,20 +225,54 @@ public class RoleService implements BaseService{
 			Reseller reseller = (Reseller) entity;
 			createDefaultRolesForReseller(reseller);
 			return;
+		case datacenter_created:
+			Datacenter datacenter = (Datacenter) entity;
+			createDefaultRolesForDatacenter(datacenter);
 		default:
 			log.error("Received unknown event type: ", eventName);
 				
 		}
 	}
 
+	private void createDefaultRolesForDatacenter(Datacenter datacenter) {
+		// create admin and read only roles for the new datacenter. Patch the datacenter with the new permissions
+		UUID adminRoleId = UUID.randomUUID();
+		UUID viewRoleId = UUID.randomUUID();
+		
+		createRolesForOrg(datacenter, adminRoleId, viewRoleId);
+		
+		// patch datacenter permissions given the new roles.
+		List<PermissionOnEntity> datacenterPerms = datacenter.getPerms();
+		getPermsForAdminRoleForDatacenter(datacenterPerms, adminRoleId);
+		getPermsForViewRoleForDatacenter(datacenterPerms, viewRoleId);
+		datacenter.setPerms(datacenterPerms);
+		ResponseMessage response = router.sendAndReceive(new RequestMessage(HttpMethod.PATCH, Datacenter.RESOURCE,
+				datacenter.getId(),  null,  null,  datacenter, Location.LOCAL, Location.LOCAL));
+		if(response.getStatus() != HttpStatus.OK) {
+			log.error("Error patching reseller with new permissions");
+		}
+	}
+
+	private void getPermsForViewRoleForDatacenter(List<PermissionOnEntity> datacenterPerms, UUID viewRoleId) {
+		for(Permission perm: Datacenter.defaultViewPermission) {
+			datacenterPerms.add(new PermissionOnEntity(perm, viewRoleId.toString()));
+		}		
+	}
+
+	private void getPermsForAdminRoleForDatacenter(List<PermissionOnEntity> datacenterPerms, UUID adminRoleId) {
+		for(Permission perm: Datacenter.defaultAdminPermissions) {
+			datacenterPerms.add(new PermissionOnEntity(perm, adminRoleId.toString()));
+		}
+	}
+
 	private void createDefaultRolesForReseller(Reseller reseller) {
-		// create admin and read only roles for the new provider. Patch the provider with the new permissions
+		// create admin and read only roles for the new reseller. Patch the reseller with the new permissions
 		UUID adminRoleId = UUID.randomUUID();
 		UUID viewRoleId = UUID.randomUUID();
 		
 		createRolesForOrg(reseller, adminRoleId, viewRoleId);
 		
-		// patch provider permissions given the new roles.
+		// patch reseller permissions given the new roles.
 		List<PermissionOnEntity> resellerPerms = reseller.getPerms();
 		getPermsForAdminRoleForReseller(resellerPerms, adminRoleId);
 		getPermsForViewRoleForReseller(resellerPerms, viewRoleId);

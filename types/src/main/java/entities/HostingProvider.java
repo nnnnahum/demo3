@@ -27,13 +27,11 @@ public class HostingProvider extends Organization{
 			Permission.MANAGE_ROLES,
 			Permission.MANAGE_USERS,
 			Permission.MANAGE_LIBRARIES,
-			Permission.MANAGE_CUSTOMERS,
 			Permission.VIEW_LIBRARIES,
 			Permission.VIEW_PROVIDERS,
 			Permission.VIEW_USERS,
 			Permission.VIEW_ROLES,
 			Permission.VIEW_DATACENTERS,
-			Permission.VIEW_CUSTOMERS,
 			Permission.VIEW_SITES)
 			  .collect(Collectors.toCollection(HashSet::new));
 	
@@ -43,7 +41,6 @@ public class HostingProvider extends Organization{
 			Permission.VIEW_USERS,
 			Permission.VIEW_ROLES,
 			Permission.VIEW_DATACENTERS,
-			Permission.VIEW_CUSTOMERS,
 			Permission.VIEW_SITES)
 			.collect(Collectors.toCollection(HashSet::new));
 }

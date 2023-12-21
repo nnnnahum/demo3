@@ -44,7 +44,7 @@ public class HostInDatacenterController {
     private void verifyHostId(Host host, String datacenterId) {
     	UUID datacenterUuid = UUID.fromString(datacenterId);
     	if(host.getDatacenter() == null || host.getDatacenter().getId() == null) {
-    		host.setDatacenter(new Datacenter(datacenterUuid, null, null, null, null, null));
+    		host.setDatacenter(new Datacenter(datacenterUuid, null, null, null, null, null, null));
     	}
 	}
 

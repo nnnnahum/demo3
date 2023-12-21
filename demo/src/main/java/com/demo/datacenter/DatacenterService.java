@@ -3,6 +3,7 @@ package com.demo.datacenter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -26,6 +27,7 @@ import entities.Host;
 import entities.Location;
 import entities.Organization;
 import entities.Permission;
+import entities.SitesAvailable;
 import entities.requests.ErrorMessage;
 import entities.requests.FieldValidationErrorMessage;
 import entities.requests.Params;
@@ -34,11 +36,8 @@ import entities.requests.ResponseMessage;
 
 @Component
 public class DatacenterService implements BaseService{
-
-	public static final String PATH = "/datacenters";
 	
 	private static final Logger log = LoggerFactory.getLogger(DatacenterService.class);
-
 	
 	@Autowired
 	MessageRouter router;
@@ -55,8 +54,9 @@ public class DatacenterService implements BaseService{
 	@PostConstruct
 	public void start() {
 		router.registerRoute(Datacenter.RESOURCE, this);
+		router.registerRoute(SitesAvailable.RESOURCE, this);
 	}
-		
+			
 	public ResponseMessage post(RequestMessage request) {
 		
 		Datacenter datacenter = (Datacenter) request.getBody();
@@ -93,8 +93,9 @@ public class DatacenterService implements BaseService{
 					"Another Datacenter already exists for name: " 
 					+ datacenter.getName());
 		}
-			
+
 		datacenter = model.post(datacenter);
+		router.notify(EventsOfInterest.datacenter_created, datacenter);
 		return new ResponseMessage(HttpStatus.CREATED, request.getHeaders(), datacenter);
 	}
 
@@ -214,6 +215,30 @@ public class DatacenterService implements BaseService{
 	}
 
 	public ResponseMessage get(RequestMessage request) {
+		switch(request.getResource()) {
+			case Datacenter.RESOURCE:
+				 return getDatacenters(request);
+			case SitesAvailable.RESOURCE:
+				return getSitesAvailable(request);
+		}
+		return null;	
+	}
+
+	
+	private ResponseMessage getSitesAvailable(RequestMessage request) {
+		// TODO add query where there is capacity. For now assume unlimited.
+		List<Datacenter> datacenters = model.get(new Params());
+		if(datacenters == null) return new ErrorMessage(HttpStatus.NOT_FOUND, null, null);
+		List<SitesAvailable> sites = datacenters
+		.stream()
+		.map(x -> x.getGeo())
+		.distinct()
+		.map(x -> new SitesAvailable(x))
+		.collect(Collectors.toList());
+		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), sites);
+	}
+
+	public ResponseMessage getDatacenters(RequestMessage request) {
 		if (request.getId() != null) {
 			return getById(request);
 		}

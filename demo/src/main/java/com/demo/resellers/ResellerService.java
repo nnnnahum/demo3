@@ -1,4 +1,5 @@
 package com.demo.resellers;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,9 +12,12 @@ import org.springframework.stereotype.Component;
 import com.demo.router.BaseService;
 import com.demo.router.MessageRouter;
 import com.demo.utils.AuthUtil;
+import com.demo.utils.OrgUtil;
 
 import entities.BaseEntity;
 import entities.EventsOfInterest;
+import entities.Location;
+import entities.Organization;
 import entities.Permission;
 import entities.PermissionOnEntity;
 import entities.Reseller;
@@ -37,6 +41,9 @@ public class ResellerService implements BaseService{
 	AuthUtil authUtil;
 	
 	@Autowired
+	OrgUtil orgUtil;
+	
+	@Autowired
 	ResellerModel model;
 	
 	@PostConstruct
@@ -51,7 +58,16 @@ public class ResellerService implements BaseService{
 		if(fvem != null) {
 			return fvem;
 		}
-			
+		
+		if(request.getSource() != Location.LOCAL) {
+			Organization org = orgUtil.getOrgfromOrgId(reseller.getId());
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_RESELLERS))) {
+				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
+						request.getHeaders(), 
+						"Unaurothized operation.");
+			}
+		}
+		
 		User userCreatingReseller = authUtil.getUserFromSession(request);
 		reseller.getPerms().add(new PermissionOnEntity(Permission.MANAGE_USERS, userCreatingReseller.getRole().getId().toString()));
 		reseller = model.post(reseller);
@@ -86,11 +102,29 @@ public class ResellerService implements BaseService{
 			return fvem;
 		}
 
+		if(request.getSource() != Location.LOCAL) {
+			Organization org = orgUtil.getOrgfromOrgId(reseller.getId());
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_RESELLERS))) {
+				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
+						request.getHeaders(), 
+						"Unaurothized operation.");
+			}
+		}
+		
 		reseller = model.put(reseller);
 		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), reseller);	
 	}
 	
 	public ResponseMessage delete(RequestMessage request) {
+		Reseller reseller = model.getById(request.getId());
+		if(request.getSource() != Location.LOCAL) {
+			Organization org = orgUtil.getOrgfromOrgId(reseller.getId());
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_RESELLERS))) {
+				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
+						request.getHeaders(), 
+						"Unaurothized operation.");
+			}
+		}
 		model.delete(request.getId());
 		return new ResponseMessage(HttpStatus.NO_CONTENT, request.getHeaders(), null);
 	}
@@ -116,6 +150,15 @@ public class ResellerService implements BaseService{
 	public ResponseMessage patch(RequestMessage request) {
 		Reseller reseller = (Reseller) request.getBody();
 		reseller.setId(request.getId());
+		Reseller existingReseller = model.getById(reseller.getId());
+		if(request.getSource() != Location.LOCAL) {
+			Organization org = orgUtil.getOrgfromOrgId(existingReseller.getId());
+			if(!authUtil.hasPermissionInOrg(request, org, Arrays.asList(Permission.MANAGE_RESELLERS))) {
+				return new ErrorMessage(HttpStatus.UNAUTHORIZED, 
+						request.getHeaders(), 
+						"Unaurothized operation.");
+			}
+		}
 		reseller = model.patch(reseller);
 		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), reseller);
 	}
