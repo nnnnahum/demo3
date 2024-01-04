@@ -71,7 +71,7 @@ public class RoleService implements BaseService{
 		
 		if(model.getById(SUPER_ADMIN_ROLE_ID) == null) {
 			//create super admin role
-			Role role = new Role(SUPER_ADMIN_ROLE_ID, "Super Baradaz", new Organization());
+			Role role = new Role(SUPER_ADMIN_ROLE_ID, "Super Geyser Data", new Organization());
 			model.post(role);
 		}
 	}

@@ -67,7 +67,7 @@ public class UserService implements BaseService{
 							RoleService.SUPER_ADMIN_ROLE_ID, null, null, null, Location.LOCAL, Location.LOCAL));
 			Role role = (Role)response.getBody();
 			//create super admin user
-			User user = new User(SUPERUSERID, "Super", "BARADAZ", null, "admin@baradaz.com", PasswordEncrypter.encrypt("abc123"), role, null);
+			User user = new User(SUPERUSERID, "Super", "GEYSERDATA", null, "admin@geyserdata.com", PasswordEncrypter.encrypt("abc123"), role, null);
 			model.post(user);
 		}
 	}
