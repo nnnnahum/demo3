@@ -12,13 +12,15 @@ public class TapeLibrary extends BaseEntity{
 	
 	public TapeLibrary() {}
 	
-	public TapeLibrary(UUID id, String ip, String hostname, String location, Integer drivesTotal, Datacenter datacenter) {
+	public TapeLibrary(UUID id, String ip, String hostname, String location, Integer drivesTotal, Datacenter datacenter,
+			Long sizeAvailable) {
 		super(id);
 		this.ip = ip;
 		this.hostname = hostname;
 		this.location = location;
 		this.datacenter = datacenter;
 		this.drivesTotal = drivesTotal;
+		this.sizeAvailable = sizeAvailable;
 	}
 	
 	private String ip;
@@ -26,6 +28,8 @@ public class TapeLibrary extends BaseEntity{
 	private String location;
 	private Datacenter datacenter;
 	private Integer drivesTotal;
+	private Integer cartridgesTotal;
+	private Long sizeAvailable;
 
 	public String getIp() {
 		return ip;
@@ -65,5 +69,21 @@ public class TapeLibrary extends BaseEntity{
 
 	public void setDrivesTotal(Integer drivesTotal) {
 		this.drivesTotal = drivesTotal;
+	}
+	
+	public Integer getCartridgesTotal() {
+		return cartridgesTotal;
+	}
+	
+	public void setCartridgesTotal(Integer catridgesTotal) {
+		this.cartridgesTotal = catridgesTotal;
+	}
+	
+	public Long getSizeAvailable() {
+		return sizeAvailable;
+	}
+	
+	public void setSizeAvailable(Long sizeAvailable) {
+		this.sizeAvailable = sizeAvailable;
 	}
 }

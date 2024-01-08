@@ -27,7 +27,9 @@ import entities.Host;
 import entities.Location;
 import entities.Organization;
 import entities.Permission;
+import entities.PermissionOnEntity;
 import entities.SitesAvailable;
+import entities.User;
 import entities.requests.ErrorMessage;
 import entities.requests.FieldValidationErrorMessage;
 import entities.requests.Params;
@@ -94,6 +96,8 @@ public class DatacenterService implements BaseService{
 					+ datacenter.getName());
 		}
 
+		User userCreatingCustomer = authUtil.getUserFromSession(request);
+		datacenter.getPerms().add(new PermissionOnEntity(Permission.MANAGE_USERS, userCreatingCustomer.getRole().getId().toString()));
 		datacenter = model.post(datacenter);
 		router.notify(EventsOfInterest.datacenter_created, datacenter);
 		return new ResponseMessage(HttpStatus.CREATED, request.getHeaders(), datacenter);
@@ -227,13 +231,18 @@ public class DatacenterService implements BaseService{
 	
 	private ResponseMessage getSitesAvailable(RequestMessage request) {
 		// TODO add query where there is capacity. For now assume unlimited.
+		// the query will need to check against the total capacity across 
+		// all tapes libraries in that datacenter. This will be calculated 
+		// at some regular interval
+		// if a datacenter has multiple black pearls, the max datacenter
+		// capacity is the largest available across the blackpearls rather
+		// than the sum since a cloud tape library cannot span multiple
+		// black pearl domains.
 		List<Datacenter> datacenters = model.get(new Params());
 		if(datacenters == null) return new ErrorMessage(HttpStatus.NOT_FOUND, null, null);
 		List<SitesAvailable> sites = datacenters
 		.stream()
-		.map(x -> x.getGeo())
-		.distinct()
-		.map(x -> new SitesAvailable(x))
+		.map(x -> new SitesAvailable(x.getId(), x.getGeo()))
 		.collect(Collectors.toList());
 		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), sites);
 	}

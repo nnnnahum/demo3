@@ -31,7 +31,7 @@ import entities.requests.ResponseMessage;
 @Component
 public class TapeLibraryService implements BaseService{
 
-	public static final String PATH = "/tapeLibrarys";
+	public static final String PATH = "/tapeLibraries";
 	
 	@Autowired
 	MessageRouter router;
@@ -137,7 +137,10 @@ public class TapeLibraryService implements BaseService{
 		if (request.getId() != null) {
 			return getById(request);
 		}
-		Params query = authUtil.appendQueryForOrgWithPermission(request, Permission.VIEW_TAPE_LIBRARIES);
+		Params query = request.getQuery();
+		if(request.getSource() != Location.LOCAL) {	
+			query = authUtil.appendQueryForOrgWithPermission(request, Permission.VIEW_TAPE_LIBRARIES);
+		}
 		List<TapeLibrary> tapeLibrarys = model.get(query);
 		long count = model.count(query);
 		return new ResponseMessage(HttpStatus.OK, request.getHeaders(), tapeLibrarys, 

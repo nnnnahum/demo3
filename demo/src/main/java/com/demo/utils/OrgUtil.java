@@ -14,6 +14,7 @@ import entities.Organization;
 import entities.Reseller;
 import entities.HostingProvider;
 import entities.Customer;
+import entities.Datacenter;
 import entities.requests.RequestMessage;
 import entities.requests.ResponseMessage;
 
@@ -39,6 +40,10 @@ public class OrgUtil {
 		if(responseMessage.getStatus() == HttpStatus.OK) {
 			return (Reseller) responseMessage.getBody();
 		}
-		return null;
+		responseMessage = router.sendAndReceive(new RequestMessage(HttpMethod.GET, 
+				Datacenter.RESOURCE, orgId, null, null, null, Location.LOCAL, Location.LOCAL));
+		if(responseMessage.getStatus() == HttpStatus.OK) {
+			return (Datacenter) responseMessage.getBody();
+		}return null;
 	}
 }

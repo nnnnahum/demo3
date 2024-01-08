@@ -123,6 +123,7 @@ public class AuthUtil {
 	
 	public User getUserFromSession(RequestMessage request) {
 		
+		if(request.getHeaders() == null) return null;
 		String auth = request.getHeaders().get("authId");
 		if(auth == null) return null;
 		UUID authId = UUID.fromString(auth);

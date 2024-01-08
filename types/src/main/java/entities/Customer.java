@@ -14,7 +14,7 @@ public class Customer extends Organization{
 	
 	public static final String RESOURCE = "/customers";
 
-	List<CloudLibrary> instances;
+	List<CloudTapeLibrary> libraries;
 	Organization parentReseller;
 
 	public Customer() {}
@@ -24,12 +24,12 @@ public class Customer extends Organization{
 		this.parentReseller = parentReseller;
 	}
 	
-	public List<CloudLibrary> getInstances(){
-		return instances;
+	public List<CloudTapeLibrary> getLibraries(){
+		return libraries;
 	}
 	
-	public void setInstances(List<CloudLibrary> instances) {
-		this.instances = instances;
+	public void setLibraries(List<CloudTapeLibrary> libraries) {
+		this.libraries = libraries;
 	}
 	
 	public Organization getParentReseller() {

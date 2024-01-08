@@ -68,6 +68,9 @@ public class DatacenterStore implements Store<Datacenter> {
 		if(datacenter.getName() != null && !datacenter.getName().isEmpty()) {
 			update.set("name", datacenter.getName());
 		}
+		if(datacenter.getPerms() != null) {
+			update.set("perms", datacenter.getPerms());
+		}
 		return ops.getMongoOperations().findAndModify(query(where("_id").is(datacenter.getId())), update, Datacenter.class, COLLECTION_NAME);
 	}
 }

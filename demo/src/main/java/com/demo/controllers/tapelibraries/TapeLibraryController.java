@@ -75,7 +75,7 @@ public class TapeLibraryController {
     		@RequestParam(required = false) String pageSize
     		) {
 		Params headers = new Params();
-		headers.put("auth", authId);
+		headers.put("authId", authId);
 		Params params = new Params();
 		if(query == null) query = "datacenter.id==" + datacenterId;
 		else {

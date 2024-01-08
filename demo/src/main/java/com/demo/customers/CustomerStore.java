@@ -27,16 +27,16 @@ public class CustomerStore implements Store<Customer> {
 	MongoDBClient ops;
 	
 	@Override
-	public Customer post(Customer tenant) {
-		return ops.getMongoOperations().insert(tenant);
+	public Customer post(Customer customer) {
+		return ops.getMongoOperations().insert(customer);
 	}
 
 	@Override
-	public Customer put(UUID id, Customer tenant) {
+	public Customer put(UUID id, Customer customer) {
 	    
 		return ops.getMongoOperations().findAndReplace(
 				query(where("_id").is(id)), 
-				tenant, COLLECTION_NAME);
+				customer, COLLECTION_NAME);
 	}
 
 	@Override
@@ -65,14 +65,14 @@ public class CustomerStore implements Store<Customer> {
 	}
 	
 	@Override
-	public Customer patch(Customer tenant) {
+	public Customer patch(Customer customer) {
 		Update update = new Update();
-		if(tenant.getName() != null && !tenant.getName().isEmpty()) {
-			update.set("name", tenant.getName());
+		if(customer.getName() != null && !customer.getName().isEmpty()) {
+			update.set("name", customer.getName());
 		}
-		if(tenant.getPerms() != null) {
-			update.set("perms", tenant.getPerms());
+		if(customer.getPerms() != null) {
+			update.set("perms", customer.getPerms());
 		}
-		return ops.getMongoOperations().findAndModify(query(where("_id").is(tenant.getId())), update, Customer.class, COLLECTION_NAME);
+		return ops.getMongoOperations().findAndModify(query(where("_id").is(customer.getId())), update, Customer.class, COLLECTION_NAME);
 	}
 }
