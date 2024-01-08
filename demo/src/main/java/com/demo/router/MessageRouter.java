@@ -9,15 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.demo.auth.RoleService;
-
 import entities.BaseEntity;
 import entities.EventsOfInterest;
 import entities.requests.ErrorMessage;
 import entities.requests.ErrorMessageException;
 import entities.requests.RequestMessage;
 import entities.requests.ResponseMessage;
-import jdk.internal.org.jline.utils.Log;
 
 @Service
 public class MessageRouter {

@@ -1,19 +1,17 @@
 package com.demo.db;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import com.github.rutledgepaulv.qbuilders.builders.GeneralQueryBuilder;
 import com.github.rutledgepaulv.qbuilders.conditions.Condition;
-import com.github.rutledgepaulv.qbuilders.visitors.MongoVisitor;
 import com.github.rutledgepaulv.rqe.pipes.QueryConversionPipeline;
 
+import entities.DomainEngine;
 import entities.requests.Params;
 
 
@@ -99,5 +97,56 @@ public class MongoStoreUtil {
 	    query.addCriteria(criteria);
 		
 		return query;
+	}
+
+	public static MatchOperation getAggregation(Class c, Params params) {
+		QueryConversionPipeline pipeline = QueryConversionPipeline.builder()
+				.useNonDefaultParsingPipe(new CustomParsingPipe())
+				.build();
+	    if(params == null) params = new Params();
+
+	    Query query = new Query();
+	    String queryStr = params.getQuery();
+	    if(queryStr == null || queryStr.isEmpty()) return null;
+	    String generateCondition = queryStr;
+	    Criteria forEM = null;
+	    if(queryStr.contains("=em=")) {
+	    	if(queryStr.contains(";")){
+	    		generateCondition = queryStr.substring(0, queryStr.lastIndexOf(";"));
+	    	} else {
+	    		generateCondition = "";
+	    	}
+	    	String emCondition = queryStr.substring(queryStr.lastIndexOf(";") + 1);
+	    	String [] elemMatch = emCondition.split("=em=");
+	    	String criteriaStr = elemMatch[1];
+	    	if(criteriaStr.startsWith("(")) {
+	    		criteriaStr = criteriaStr.substring(1);
+	    	} 
+	    	if(criteriaStr.endsWith(")")) {
+	    		criteriaStr = criteriaStr.substring(0, criteriaStr.length() - 1);
+	    	}
+	    	String [] criteriaPieces = criteriaStr.split(",");
+	    	
+	    	forEM = Criteria.where(elemMatch[0]);
+	    	Criteria inside = null;
+	    	for(String piece : criteriaPieces) {
+	    		String [] pieces = piece.split(":");
+	    		if(inside == null) {
+	    			inside = Criteria.where(pieces[0]).is(pieces[1]);
+	    		} else {
+	    			inside.and(pieces[0]).is(pieces[1]);
+	    		}
+	    	}
+    		forEM.elemMatch(inside);
+		}
+	    Criteria criteria = null;
+	    if(generateCondition != null && !generateCondition.isEmpty()) {
+			Condition<GeneralQueryBuilder> condition = pipeline.apply(generateCondition, c);
+		    criteria = condition.query(new MyMongoVisitor());
+	    }
+	    if(forEM != null) {
+	    	if(criteria == null) criteria = forEM;
+	    }
+	    return Aggregation.match(criteria);
 	}
 }

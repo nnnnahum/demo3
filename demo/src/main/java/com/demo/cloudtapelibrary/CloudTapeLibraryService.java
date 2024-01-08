@@ -24,7 +24,7 @@ import entities.EventsOfInterest;
 import entities.Location;
 import entities.Organization;
 import entities.Permission;
-import entities.TapeLibrary;
+import entities.DomainEngine;
 import entities.requests.Count;
 import entities.requests.ErrorMessage;
 import entities.requests.ErrorMessageException;
@@ -77,17 +77,19 @@ public class CloudTapeLibraryService implements BaseService {
 		query.setSort("sizeAvailable");
 		query.setPage("1");
 		query.setPageSize("1");
-		ResponseMessage response = router.sendAndReceive(new RequestMessage(HttpMethod.GET, TapeLibrary.RESOURCE, null, query, null, null, Location.LOCAL, Location.LOCAL));
+		ResponseMessage response = router.sendAndReceive(new RequestMessage(HttpMethod.GET, DomainEngine.RESOURCE, null, query, null, null, Location.LOCAL, Location.LOCAL));
 		if(response.getStatus() != HttpStatus.OK) {
 			log.error("Couldn't find available tape library");
 			return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, 
 					request.getHeaders(), "Couldn't find available tape library");
 		}
-		List<TapeLibrary> tapeLibraries = (List<TapeLibrary>)response.getBody();
+		List<DomainEngine> tapeLibraries = (List<DomainEngine>)response.getBody();
 		if(tapeLibraries.isEmpty()) {
-			log.error("Couldn't find available tape library");
+			// TODO - just because there isn't capacity doesn't mean we don't want to start. 
+			// Still need to define the behavior here.
+			log.error("Couldn't find available domain engine");
 			return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, 
-					request.getHeaders(), "Insufficient tape library capacity");
+					request.getHeaders(), "Insufficient domain engine capacity in this datacenter");
 		}
 		
 		//TODO maybe patch the tape library if it is 'thick' provisioned?

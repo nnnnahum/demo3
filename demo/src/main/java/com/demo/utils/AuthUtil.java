@@ -160,4 +160,25 @@ public class AuthUtil {
 		query.put(Params.QUERY, queryStr);
 		return query;
 	}
+	
+	public Params appendQueryforParentOrgWithPermission(RequestMessage request, Permission permission, String parentField) {
+		User user = getUserFromSession(request);
+		
+		// this is the super admin, no need to append anything
+		if(user.getRole().getId().equals(RoleService.SUPER_ADMIN_ROLE_ID)) {
+			return request.getQuery();
+		}
+		
+		//append to the query that the perms has an entry with the permission and role id of the user
+		Params query = request.getQuery();
+		query = query == null? new Params() : query;
+		String queryStr = query.getQuery();
+		if(queryStr == null || queryStr.isEmpty()) {
+			queryStr = parentField + ".perms=em=(permission:"+permission.name() +",roleId:"+user.getRole().getId() +")" ;
+		} else {
+			queryStr += ";" + parentField +".perms=em=(permission:"+permission.name() +",roleId:"+user.getRole().getId() +")";
+		}
+		query.put(Params.QUERY, queryStr);
+		return query;
+	}
 }

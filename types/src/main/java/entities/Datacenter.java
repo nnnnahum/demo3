@@ -22,16 +22,19 @@ public class Datacenter extends Organization{
 	public static final Set<Permission> defaultAdminPermissions = Stream.of(
 			Permission.MANAGE_ROLES,
 			Permission.MANAGE_USERS,
+			Permission.MANAGE_DOMAIN_ENGINES,
 			Permission.MANAGE_TAPE_LIBRARIES,
 			Permission.VIEW_USERS,
 			Permission.VIEW_ROLES,
-			Permission.VIEW_TAPE_LIBRARIES)
+			Permission.VIEW_TAPE_LIBRARIES,
+			Permission.VIEW_DOMAIN_ENGINES)
 			  .collect(Collectors.toCollection(HashSet::new));
 	
 	public static final Set<Permission> defaultViewPermission = Stream.of(
 			Permission.VIEW_USERS,
 			Permission.VIEW_ROLES,
-			Permission.VIEW_TAPE_LIBRARIES)
+			Permission.VIEW_TAPE_LIBRARIES,
+			Permission.VIEW_DOMAIN_ENGINES)
 			.collect(Collectors.toCollection(HashSet::new));
 	
 	public Datacenter() {}
