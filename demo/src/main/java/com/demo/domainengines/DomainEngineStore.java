@@ -99,9 +99,14 @@ public class DomainEngineStore implements Store<DomainEngine>{
 			domainEngine.setHostname(domainDoc.getString("hostname"));
 			domainEngine.setIp(domainDoc.getString("ip"));
 			domainEngine.setSizeAvailable(domainDoc.getLong("sizeAvailable"));
-			
-			//TODO add datacenter converter
-//			domainEngine.setDatacenter(domainDoc.get("datacenter", Datacenter.class));
+			Document datacenterDoc = (Document) domainDoc.get("datacenter");
+			if(datacenterDoc != null) {
+				Datacenter datacenter = new Datacenter();
+				datacenter.setId(datacenterDoc.get("_id", UUID.class));
+				datacenter.setName(datacenterDoc.getString("name"));
+				datacenter.setGeo(datacenterDoc.getString("geo"));
+				domainEngine.setDatacenter(datacenter);
+			}
 			domainEngines.add(domainEngine);
 		}
 		
